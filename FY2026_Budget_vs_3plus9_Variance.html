@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FY2026 Budget vs 3+9 Projection — Variance Analysis</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="services.js"></script>
 <style>
 :root{
   --bg:#f4f6f9;--panel:#ffffff;--panel2:#eef2f7;--ink:#1b2738;--mut:#5d6b7e;
@@ -104,6 +105,14 @@ table.detail .greycell{background:#dfe4ea}
 #pwgate button:hover{background:#0a5252}
 #pwgate .pwerr{color:#cc3b32;font-size:12.5px;margin-top:9px;min-height:15px}
 body.locked{overflow:hidden}
+.svccards{display:grid;grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:10px;margin-top:4px}
+.svccard{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:10px 12px;cursor:pointer;box-shadow:var(--shadow);transition:border-color .12s}
+.svccard:hover{border-color:var(--accent)}
+.svccard .sc-n{font-weight:700;font-size:14px;color:#0e3942}
+.svccard .sc-pl{font-size:11px;color:var(--mut);margin-top:2px}
+.svccard .sc-v{font-size:11px;font-weight:600;margin-top:1px}
+.backlink{color:var(--accent);cursor:pointer;font-size:13px;text-decoration:none}
+.backlink:hover{text-decoration:underline}
 </style>
 </head>
 <body class="locked">
@@ -272,6 +281,7 @@ body.locked{overflow:hidden}
 </div>
 </div>
 <div class="wrap page" id="page-detail"></div>
+<div class="wrap page" id="page-service"></div>
 
 <script>
 const DATA={"bridge": {"voy": [1312.0, 1191.0], "bsa": [441086.0, 606023.0], "vol": [587758.042772737, 802841.7116105232], "coc": [518270.204733356, 664707.3072223689], "soc": [69487.8380393812, 138134.40438815427], "rev": [614522623.327559, 1138415953.19597], "var": [210676221.179774, 448221166.5527277], "fix": [355713256.453208, 497257766.04093635], "tc": [566389477.632982, 945478932.593664], "gp": [48133145.694577, 192937020.602306], "q1_gp": 9385826.72538328, "aprdec_gp": 183551193.87692273}, "groups": ["TWN", "SH", "LH-Red Sea", "LH-India & Middle East", "East Africa", "SH2", "AEM", "SH3"], "tg": {"TWN": {"rev_pl": 25051.287986098865, "init_pl": 18429.348487915126, "var_pl": 6621.9394981837395}, "SH": {"rev_pl": -2380.8265443432683, "init_pl": 2617.1228780765687, "var_pl": -4997.949422419837}, "LH-Red Sea": {"rev_pl": 70197.5623200757, "init_pl": 22656.432318851643, "var_pl": 47541.13000122405}, "LH-India & Middle East": {"rev_pl": 79211.85689496793, "init_pl": -7560.078960545511, "var_pl": 86771.93585551344}, "East Africa": {"rev_pl": 1684.9696247617626, "init_pl": 1581.15369920219, "var_pl": 103.81592555957263}, "SH2": {"rev_pl": 12970.731582672648, "init_pl": -3739.7490541482002, "var_pl": 16710.48063682085}, "AEM": {"rev_pl": 9801.261569632035, "init_pl": 14148.916325225504, "var_pl": -4347.6547555934685}, "SH3": {"rev_pl": -3599.822831559535, "init_pl": 0.0, "var_pl": -3599.822831559535}}, "lanes": [{"group": "TWN", "lane": "ST1", "rev_pl": 9511.259795466707, "init_pl": 9400.68100486988, "var_pl": 110.57879059682637}, {"group": "TWN", "lane": "ST3", "rev_pl": 8436.75359720083, "init_pl": 5022.11560469798, "var_pl": 3414.6379925028496}, {"group": "TWN", "lane": "HDT", "rev_pl": 6999.864459586876, "init_pl": 3901.1013647526697, "var_pl": 3098.7630948342066}, {"group": "TWN", "lane": "TH3", "rev_pl": 103.41013384443806, "init_pl": 105.45051359459501, "var_pl": -2.0403797501569443}, {"group": "Short-Haul (SH)", "lane": "NP2", "rev_pl": -96.99626177126902, "init_pl": 898.4034660406301, "var_pl": -995.3997278118991}, {"group": "Short-Haul (SH)", "lane": "BDX", "rev_pl": 55.74634071671585, "init_pl": -724.406362820729, "var_pl": 780.1527035374448}, {"group": "Short-Haul (SH)", "lane": "CCT", "rev_pl": 1577.6035589721105, "init_pl": 615.2068804544799, "var_pl": 962.3966785176306}, {"group": "Short-Haul (SH)", "lane": "CH1", "rev_pl": -452.8356780848476, "init_pl": -667.278369199724, "var_pl": 214.44269111487642}, {"group": "Short-Haul (SH)", "lane": "NSX", "rev_pl": -964.531271965081, "init_pl": 256.38538774308, "var_pl": -1220.916659708161}, {"group": "Short-Haul (SH)", "lane": "CP8", "rev_pl": 931.6879400829907, "init_pl": 404.187164392007, "var_pl": 527.5007756909838}, {"group": "Short-Haul (SH)", "lane": "CST", "rev_pl": -4541.559497118098, "init_pl": 695.625180881588, "var_pl": -5237.184677999686}, {"group": "Short-Haul (SH)", "lane": "IQH", "rev_pl": 133.05939219542893, "init_pl": 220.410519932182, "var_pl": -87.35112773675309}, {"group": "Short-Haul (SH)", "lane": "JCT", "rev_pl": 437.3801476287026, "init_pl": 410.201763283701, "var_pl": 27.178384345001632}, {"group": "Short-Haul (SH)", "lane": "KHX", "rev_pl": 116.51548243829211, "init_pl": 172.41581566275198, "var_pl": -55.90033322445987}, {"group": "Short-Haul (SH)", "lane": "SL1", "rev_pl": -225.16162390889627, "init_pl": 0.0, "var_pl": -225.16162390889627}, {"group": "Short-Haul (SH)", "lane": "SVP", "rev_pl": 648.2649264706959, "init_pl": 335.971431706602, "var_pl": 312.29349476409385}, {"group": "Long-Haul Red Sea", "lane": "REX", "rev_pl": 60206.84725680778, "init_pl": 9620.51872077894, "var_pl": 50586.328536028836}, {"group": "Long-Haul Red Sea", "lane": "RES", "rev_pl": 9990.71506326789, "init_pl": 0.0, "var_pl": 9990.71506326789}, {"group": "Long-Haul Red Sea", "lane": "RCS", "rev_pl": 0.0, "init_pl": 13035.9135980727, "var_pl": -13035.9135980727}, {"group": "East Africa", "lane": "MFX", "rev_pl": 1684.9696247617626, "init_pl": 1581.15369920219, "var_pl": 103.81592555957263}, {"group": "Long-Haul India & ME", "lane": "JFX", "rev_pl": -241.88442823369996, "init_pl": -551.47586803076, "var_pl": 309.59143979706005}, {"group": "Long-Haul India & ME", "lane": "MGA", "rev_pl": 102.13345222480109, "init_pl": 359.49731298618, "var_pl": -257.36386076137893}, {"group": "Long-Haul India & ME", "lane": "SGS", "rev_pl": 305.9818631608232, "init_pl": -240.651564364841, "var_pl": 546.6334275256642}, {"group": "Long-Haul India & ME", "lane": "CGS", "rev_pl": -1896.7166255854008, "init_pl": 0.0, "var_pl": -1896.7166255854008}, {"group": "Long-Haul India & ME", "lane": "CGX", "rev_pl": 58232.21945932196, "init_pl": 0.0, "var_pl": 58232.21945932196}, {"group": "Long-Haul India & ME", "lane": "LHT", "rev_pl": 288.35000072359196, "init_pl": 0.0, "var_pl": 288.35000072359196}, {"group": "Long-Haul India & ME", "lane": "SGX", "rev_pl": -369.90535134873767, "init_pl": 0.0, "var_pl": -369.90535134873767}, {"group": "Long-Haul India & ME", "lane": "CI3", "rev_pl": -986.1483529545949, "init_pl": -4145.5563592988, "var_pl": 3159.408006344205}, {"group": "Long-Haul India & ME", "lane": "CSX", "rev_pl": 16.025169160327778, "init_pl": -1136.43593583411, "var_pl": 1152.4611049944378}, {"group": "Long-Haul India & ME", "lane": "CWS", "rev_pl": -364.4301251801903, "init_pl": -1845.4565460031802, "var_pl": 1481.0264208229898}, {"group": "Long-Haul India & ME", "lane": "HLX", "rev_pl": 11586.303660080439, "init_pl": 0.0, "var_pl": 11586.303660080439}, {"group": "Long-Haul India & ME", "lane": "SIS", "rev_pl": 12539.928173598551, "init_pl": 0.0, "var_pl": 12539.928173598551}, {"group": "West Asia (SH2)", "lane": "IMR", "rev_pl": 2865.5608777539965, "init_pl": -3598.19593177454, "var_pl": 6463.756809528537}, {"group": "West Asia (SH2)", "lane": "JPS", "rev_pl": 1556.0202020703855, "init_pl": 1448.770528, "var_pl": 107.24967407038548}, {"group": "West Asia (SH2)", "lane": "SJA", "rev_pl": 2132.78861848169, "init_pl": -1590.32365037366, "var_pl": 3723.1122688553496}, {"group": "West Asia (SH2)", "lane": "WAT", "rev_pl": -34.7700698670695, "init_pl": 0.0, "var_pl": -34.7700698670695}, {"group": "West Asia (SH2)", "lane": "GTS", "rev_pl": 529.883491397242, "init_pl": 0.0, "var_pl": 529.883491397242}, {"group": "West Asia (SH2)", "lane": "RTS", "rev_pl": 5921.248462836401, "init_pl": 0.0, "var_pl": 5921.248462836401}, {"group": "AEM", "lane": "AM1", "rev_pl": 9801.261569632035, "init_pl": 14479.1607002255, "var_pl": -4677.899130593465}, {"group": "AEM", "lane": "NTE", "rev_pl": 0.0, "init_pl": -330.244374999997, "var_pl": 330.244374999997}, {"group": "AEM", "lane": "ECCL", "rev_pl": 0.0, "init_pl": 0.0, "var_pl": 0.0}, {"group": "SH3", "lane": "MES", "rev_pl": -4343.525489723872, "init_pl": 0.0, "var_pl": -4343.525489723872}, {"group": "SH3", "lane": "NAF", "rev_pl": 743.7026581643365, "init_pl": 0.0, "var_pl": 743.7026581643365}],
@@ -541,6 +551,9 @@ function buildDetail(g){
  h+='</tbody></table><div class="notes" style="margin-top:8px">Budget shown only for services in the original budget. <span class="new">NEW</span> = new service (no budget); <span class="new">BUD-ONLY</span> = budgeted but not run in the projection. "Proj (bnk&rarr;orig)" re-prices projection bunker to original rates. Budget per-TEU uses initial-budget detail (gross volume incl. fixed-slot SOC), so high-SOC services (e.g. HDT) show low budget cost/TEU.</div></div>';
  // comments for this group
  h+='<h3 class="dsub">Comments &amp; analysis &mdash; '+name+'</h3><div class="card"><textarea class="note dnote" data-k="'+g+'" rows="6" placeholder="Paste commentary and analysis for '+name+'&hellip;"></textarea><div class="notesbar"><span></span><span id="dsaved" class="dsaved">Auto-saved in this browser</span></div></div>';
+ h+='<h3 class="dsub">Service-level analysis &mdash; select a service</h3><div class="notes" style="margin:-4px 0 8px">Quarterly rate &amp; volume (3+9 vs budget), rate/volume impact, and the trade-presentation charts.</div><div class="svccards">';
+ L.forEach(function(l){var dv=l.rpl-l.ipl;h+='<div class="svccard" data-svc="'+l.n+'" data-grp="'+g+'"><div class="sc-n">'+l.n+'</div><div class="sc-pl">P&L $'+fmt0(l.rpl)+'K</div><div class="sc-v '+(dv>=0?'pos':'neg')+'">'+(dv>=0?'+':'')+'$'+fmt0(dv)+'K vs bgt</div></div>';});
+ h+='</div>';
  document.getElementById('page-detail').innerHTML=h;
  bindNote(document.querySelector('#page-detail textarea.note'),'dsaved');
 }
@@ -564,8 +577,48 @@ if(Object.keys(NSTORE).some(k=>k!=='_open'))document.getElementById('notesSaved'
 
 // ----- sidebar navigation -----
 (function(){let h='';DATA.groups.forEach(g=>{const v=DATA.tg[g].rev_pl/1000;h+='<a class="navlink" data-pg="'+g+'">'+dispN[g]+'<span class="'+(v>=0?'sbpos':'sbneg')+'">'+(v>=0?'+':'−')+'$'+Math.abs(v).toFixed(1)+'M</span></a>';});document.getElementById('navGroups').innerHTML=h;})();
-function showPage(pg){document.querySelectorAll('.navlink').forEach(a=>a.classList.toggle('active',a.dataset.pg===pg));const dash=document.getElementById('page-dashboard'),pdet=document.getElementById('page-detail');if(pg==='dashboard'){dash.classList.add('active');pdet.classList.remove('active');}else{buildDetail(pg);dash.classList.remove('active');pdet.classList.add('active');}window.scrollTo(0,0);}
+function setPage(id){['page-dashboard','page-detail','page-service'].forEach(function(p){var el=document.getElementById(p);if(el)el.classList.toggle('active',p===id);});window.scrollTo(0,0);}
+function showPage(pg){document.querySelectorAll('.navlink').forEach(a=>a.classList.toggle('active',a.dataset.pg===pg));if(pg==='dashboard'){setPage('page-dashboard');}else{buildDetail(pg);setPage('page-detail');}}
 document.getElementById('sidebar').addEventListener('click',e=>{const a=e.target.closest('.navlink');if(a){e.preventDefault();showPage(a.dataset.pg);}});
+document.addEventListener('click',function(e){var c=e.target.closest('.svccard');if(c){showService(c.dataset.svc,c.dataset.grp);}});
+function rvImpact(l){if(l.b_coc==null)return null;var bteu=l.b_coc+l.b_soc,pteu=l.coc+l.soc;if(!bteu||!pteu)return null;function dec(b,p){var rb=b/bteu,rp=p/pteu;return {b:b,p:p,d:p-b,vol:(pteu-bteu)*rb,rate:(rp-rb)*pteu};}return {bteu:bteu,pteu:pteu,rev:dec(l.b_rev,l.rev),vc:dec(l.b_var,l['var']),fc:dec(l.b_fix,l.fix)};}
+function showService(svc,grp){
+ var L=DETAIL[grp].lanes.find(function(x){return x.n===svc;});if(!L)return;
+ var name=dispN[grp];var sv=(typeof SVC!=='undefined')?SVC[svc]:null;
+ var h='<div class="ptitle">Service '+svc+' <span style="font-size:14px;color:var(--mut);font-weight:400">&mdash; '+name+'</span></div>';
+ h+='<div style="margin-bottom:14px"><span class="backlink" data-grp="'+grp+'">&larr; Back to '+name+'</span></div>';
+ var imp=rvImpact(L);
+ h+='<h3 class="dsub">Rate &amp; volume impact &mdash; 3+9 vs Budget (US$\'K)</h3>';
+ if(imp){
+  h+='<div class="card" style="overflow-x:auto"><table class="detail"><thead><tr><th>Item</th><th>Budget</th><th>Projection</th><th>&Delta;</th><th>Volume effect</th><th>Rate effect</th></tr></thead><tbody>';
+  function rr(lab,o,ci){var cls=(ci?(o.d<=0):(o.d>=0))?'pos':'neg';h+='<tr><td>'+lab+'</td><td>'+mny(o.b)+'</td><td>'+mny(o.p)+'</td><td class="'+cls+'">'+mny(o.d)+'</td><td>'+mny(o.vol)+'</td><td>'+mny(o.rate)+'</td></tr>';}
+  rr('Revenue',imp.rev,false);rr('Variable cost',imp.vc,true);rr('Fixed cost',imp.fc,true);
+  h+='</tbody></table><div class="notes" style="margin-top:8px">Volume effect = (proj TEU &minus; budget TEU) &times; budget rate. Rate effect = (proj rate &minus; budget rate) &times; proj TEU. TEU '+fmt0(imp.bteu)+' &rarr; '+fmt0(imp.pteu)+'. Fixed cost is largely capacity-driven, so its volume/rate split is indicative only.</div></div>';
+ }else{h+='<div class="card notes">New service &mdash; no budget baseline, so no rate/volume variance to decompose.</div>';}
+ var teu=L.coc+L.soc,bteu=(L.b_coc!=null)?(L.b_coc+L.b_soc):0;
+ h+='<h3 class="dsub">Per-TEU (US$)</h3><div class="card" style="overflow-x:auto"><table class="detail"><thead><tr><th>Item</th><th>Budget</th><th>Projection</th></tr></thead><tbody>';
+ function pr(lab,bv,pv){h+='<tr><td>'+lab+'</td><td>'+(bteu&&bv!=null?dol(bv*1000/bteu):'&mdash;')+'</td><td>'+(teu?dol(pv*1000/teu):'&mdash;')+'</td></tr>';}
+ pr('Revenue / TEU',L.b_rev,L.rev);pr('Variable cost / TEU',L.b_var,L['var']);pr('Fixed cost / TEU',L.b_fix,L.fix);
+ h+='<tr><td>Fixed cost / TEU (bunker&rarr;orig)</td><td>&mdash;</td><td>'+(teu?dol((L.fix-L.prem)*1000/teu):'&mdash;')+'</td></tr>';
+ pr('Gross profit / TEU',(L.b_rev!=null?(L.b_rev-L.b_fix-L.b_var):null),L.rpl);
+ h+='</tbody></table></div>';
+ h+='<h3 class="dsub">Rate &amp; volume by quarter (trade presentation)</h3>';
+ var hasCh=sv&&((sv.hh&&sv.hh.vol)||(sv.bh&&sv.bh.vol)||sv.img);
+ if(hasCh){
+  if(sv.img)h+='<div class="card"><img src="'+sv.img+'" alt="rate/volume chart" style="max-width:100%;display:block;border:1px solid var(--line);border-radius:6px"></div>';
+  if(sv.hh&&sv.hh.vol)h+='<div class="card" style="margin-top:14px"><div style="font-weight:600;margin-bottom:6px;color:#0e3942">Headhaul</div><div class="chartbox" style="height:300px"><canvas id="svchh"></canvas></div></div>';
+  if(sv.bh&&sv.bh.vol)h+='<div class="card" style="margin-top:14px"><div style="font-weight:600;margin-bottom:6px;color:#0e3942">Backhaul</div><div class="chartbox" style="height:300px"><canvas id="svcbh"></canvas></div></div>';
+ }else{h+='<div class="card notes">No rate/volume chart available from the trade presentation for this service.</div>';}
+ var rem='';if(sv&&sv.hh&&sv.hh.rem)rem+='Headhaul — '+sv.hh.rem+'\n\n';if(sv&&sv.bh&&sv.bh.rem)rem+='Backhaul — '+sv.bh.rem;
+ if(rem.trim()){h+='<h3 class="dsub">Trade comments</h3><div class="card notes" style="white-space:pre-line">'+rem.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</div>';}
+ document.getElementById('page-service').innerHTML=h;
+ document.querySelectorAll('.navlink').forEach(a=>a.classList.remove('active'));
+ setPage('page-service');
+ if(window._svc){window._svc.forEach(function(c){try{c.destroy();}catch(e){}});}window._svc=[];
+ function mk(id,side){var el=document.getElementById(id);if(!el||!side||!side.vol)return;window._svc.push(new Chart(el,{data:{labels:side.cats,datasets:[{type:'bar',label:'Volume (TEU)',data:side.vol,backgroundColor:'#9cc3e0',yAxisID:'y'},{type:'line',label:'Rev / TEU ($)',data:side.rate,borderColor:css('--accent'),backgroundColor:css('--accent'),borderWidth:2,tension:.3,yAxisID:'y1'}]},options:{maintainAspectRatio:false,plugins:{legend:{labels:{color:css('--ink')}}},scales:{x:{ticks:{color:css('--mut'),maxRotation:45,minRotation:0},grid:{display:false}},y:{position:'left',title:{display:true,text:'TEU',color:css('--mut')},ticks:{color:css('--mut')},grid:{color:css('--line')}},y1:{position:'right',title:{display:true,text:'$/TEU',color:css('--mut')},ticks:{color:css('--mut')},grid:{display:false}}}}}));}
+ if(sv){mk('svchh',sv.hh);mk('svcbh',sv.bh);}
+ var bl=document.querySelector('#page-service .backlink');if(bl)bl.addEventListener('click',function(){showPage(grp);});
+}
 </script>
 </body>
 </html>
