@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FY2026 Budget vs 3+9 Projection — Variance Analysis</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f4f6f9;--panel:#ffffff;--panel2:#eef2f7;--ink:#1b2738;--mut:#5d6b7e;
+  --line:#e1e7f0;--pos:#1a8a5a;--posbg:#e7f5ee;--neg:#cc3b32;--negbg:#fdecea;
+  --accent:#2b6fd6;--gold:#b07d18;--shadow:0 1px 3px rgba(20,40,80,.07);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 22px 60px}
+header h1{font-size:24px;margin:0 0 4px}
+header .sub{color:var(--mut);font-size:14px}
+.basis{margin-top:12px;font-size:12.5px;color:var(--mut);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 14px;box-shadow:var(--shadow)}
+h2{font-size:16px;margin:34px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--line);letter-spacing:.3px;color:#101a29}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;box-shadow:var(--shadow)}
+.kpi .lbl{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
+.kpi .big{font-size:26px;font-weight:700;margin:6px 0 2px}
+.kpi .row{font-size:12.5px;color:var(--mut)}
+.kpi .delta{font-size:13px;font-weight:600;margin-top:6px}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+.grid2{display:grid;grid-template-columns:1.05fr .95fr;gap:22px;align-items:start}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:7px 9px;text-align:center;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+thead th{color:var(--mut);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;position:sticky;top:0;background:var(--panel)}
+tbody tr:hover{background:var(--panel2)}
+.tot{font-weight:700;border-top:2px solid var(--line)}
+.tot td{border-bottom:none}
+.chartbox{position:relative;height:340px}
+.chartbox.tall{height:560px}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700;letter-spacing:.2px}
+.t-rate{background:var(--posbg);color:var(--pos)}
+.t-vol{background:#e8eefb;color:var(--accent)}
+.t-new{background:#fbf0db;color:var(--gold)}
+.t-loss{background:var(--negbg);color:var(--neg)}
+.t-mix{background:#eef2f7;color:var(--mut)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 12px}
+.controls input,.controls select{background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:7px 10px;font-size:13px}
+.new{color:var(--gold);font-size:10.5px;font-weight:700;margin-left:5px;vertical-align:middle}
+.scroll{max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.notes{font-size:13px;color:var(--mut)}
+.notes li{margin-bottom:7px}
+.notes b{color:var(--ink)}
+.foot{margin-top:40px;color:var(--mut);font-size:12px;border-top:1px solid var(--line);padding-top:14px}
+.sortable{cursor:pointer;user-select:none}
+.sortable:after{content:" \2195";opacity:.4;font-size:10px}
+@media(max-width:860px){.kpis{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+details.notepanel{margin-top:16px;border:1px solid var(--line);border-radius:10px;background:var(--panel);box-shadow:var(--shadow);overflow:hidden}
+details.notepanel>summary{cursor:pointer;padding:13px 16px;font-weight:600;font-size:14px;list-style:none;display:flex;align-items:center;justify-content:space-between;color:#101a29}
+details.notepanel>summary::-webkit-details-marker{display:none}
+details.notepanel>summary .chev{color:var(--mut);font-weight:400;font-size:12px}
+.arw::before{content:"\25B8  ";color:var(--accent)}
+details.notepanel[open]>summary .arw::before{content:"\25BE  "}
+details.notepanel[open]>summary{border-bottom:1px solid var(--line)}
+.notesbody{padding:14px 16px}
+.ntlbl{display:block;font-size:12.5px;color:var(--mut);margin-bottom:4px}
+textarea.note{width:100%;box-sizing:border-box;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:8px 10px;font:inherit;font-size:13px;resize:vertical}
+textarea.note:focus{outline:none;border-color:var(--accent)}
+.notesbar{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:12px;color:var(--mut)}
+.notesbar button{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:5px 11px;font-size:12px;color:var(--ink);cursor:pointer}
+.notesbar button:hover{border-color:var(--neg);color:var(--neg)}
+body{padding-left:214px}
+#sidebar{position:fixed;top:0;left:0;width:214px;height:100vh;overflow-y:auto;background:#0e3942;padding:16px 0 30px;z-index:50}
+#sidebar .sbtitle{font-size:13px;font-weight:700;color:#fff;padding:2px 16px}
+#sidebar .sbsub{font-size:11px;color:#9fc0c4;padding:2px 16px 8px}
+#sidebar .sbsec{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:#7da3a8;padding:14px 16px 6px}
+.navlink{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 16px;color:#dceaec;text-decoration:none;font-size:13px;border-left:3px solid transparent;cursor:pointer}
+.navlink:hover{background:#12525e}
+.navlink.active{background:#0a2a31;border-left-color:#41c2b8;color:#fff;font-weight:600}
+.navlink .sbpos{font-size:11px;color:#6fe0ad}
+.navlink .sbneg{font-size:11px;color:#ff9a93}
+.page{display:none}
+.page.active{display:block}
+.ptitle{font-size:22px;font-weight:700;color:#0e3942;margin:6px 0 14px;padding-bottom:8px;border-bottom:2px solid #0e3942}
+.dsub{font-size:14.5px;margin:24px 0 8px;color:#101a29}
+table.detail{width:max-content;min-width:100%;border-collapse:collapse}
+table.detail th,table.detail td{border:1px solid var(--line);padding:7px 11px;text-align:center;vertical-align:middle}
+table.detail td{white-space:nowrap}
+table.detail th{white-space:normal}
+table.detail td:not(:first-child),table.detail th:not(:first-child){min-width:74px}
+table.detail thead th{background:#0e6b6b;color:#fff;text-transform:none;letter-spacing:0;font-size:12px;position:static;border-color:#0a5252}
+table.detail th:first-child,table.detail td:first-child{text-align:left;min-width:210px;white-space:normal}
+table.detail tbody tr:hover{background:#f3f7fa}
+table.detail .plrow{font-weight:700}
+table.detail .greycell{background:#dfe4ea}
+.dnote{width:100%;box-sizing:border-box;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 12px;font:inherit;font-size:13px;resize:vertical}
+.dnote:focus{outline:none;border-color:var(--accent)}
+@media(max-width:760px){body{padding-left:0}#sidebar{position:static;width:auto;height:auto;display:flex;flex-wrap:wrap;gap:4px}#sidebar .sbsec,#sidebar .sbsub{display:none}}
+#pwgate{position:fixed;inset:0;z-index:99999;background:#0e3942;display:flex;align-items:center;justify-content:center}
+#pwgate .pwbox{background:#fff;border-radius:12px;padding:30px 32px;width:330px;box-shadow:0 12px 44px rgba(0,0,0,.35);text-align:center}
+#pwgate .pwtitle{font-size:16px;font-weight:700;color:#0e3942;margin-bottom:4px}
+#pwgate .pwsub{font-size:12.5px;color:#5d6b7e;margin-bottom:16px}
+#pwgate input{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #d0d8e2;border-radius:8px;font-size:14px;margin-bottom:10px}
+#pwgate input:focus{outline:none;border-color:#0e6b6b}
+#pwgate button{width:100%;padding:11px;background:#0e6b6b;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+#pwgate button:hover{background:#0a5252}
+#pwgate .pwerr{color:#cc3b32;font-size:12.5px;margin-top:9px;min-height:15px}
+body.locked{overflow:hidden}
+</style>
+</head>
+<body class="locked">
+<div id="pwgate">
+  <div class="pwbox">
+    <div class="pwtitle">CUL&middot;Lines FY2026 &mdash; Restricted</div>
+    <div class="pwsub">Enter password to view this report</div>
+    <input id="pwinput" type="password" placeholder="Password" autocomplete="off" spellcheck="false">
+    <button id="pwbtn" type="button">Unlock</button>
+    <div class="pwerr" id="pwerr"></div>
+  </div>
+</div>
+<script>
+(function(){
+ var HASH='e4eddce9634caed956879496c55f679e2ed393ace55741ab389a174df5266816';
+ function sha256(ascii){function R(v,a){return (v>>>a)|(v<<(32-a));}var mp=Math.pow,mw=mp(2,32),i,j,result='';var words=[];var bl=ascii.length*8;var hash=sha256.h=sha256.h||[];var k=sha256.k=sha256.k||[];var pc=k.length;var ic={};for(var c=2;pc<64;c++){if(!ic[c]){for(i=0;i<313;i+=c){ic[i]=c;}hash[pc]=(mp(c,.5)*mw)|0;k[pc++]=(mp(c,1/3)*mw)|0;}}ascii+='\x80';while(ascii.length%64-56)ascii+='\x00';for(i=0;i<ascii.length;i++){j=ascii.charCodeAt(i);if(j>>8)return;words[i>>2]|=j<<((3-i)%4)*8;}words[words.length]=((bl/mw)|0);words[words.length]=(bl);for(j=0;j<words.length;){var w=words.slice(j,j+=16);var oh=hash;hash=hash.slice(0,8);for(i=0;i<64;i++){var w15=w[i-15],w2=w[i-2];var a=hash[0],e=hash[4];var t1=hash[7]+(R(e,6)^R(e,11)^R(e,25))+((e&hash[5])^((~e)&hash[6]))+k[i]+(w[i]=i<16?w[i]:(w[i-16]+(R(w15,7)^R(w15,18)^(w15>>>3))+w[i-7]+(R(w2,17)^R(w2,19)^(w2>>>10)))|0);var t2=(R(a,2)^R(a,13)^R(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));hash=[(t1+t2)|0].concat(hash);hash[4]=(hash[4]+t1)|0;}for(i=0;i<8;i++){hash[i]=(hash[i]+oh[i])|0;}}for(i=0;i<8;i++){for(j=3;j+1;j--){var b=(hash[i]>>(j*8))&255;result+=((b<16)?0:'')+b.toString(16);}}return result;}
+ function unlock(){var g=document.getElementById('pwgate');if(g)g.style.display='none';document.body.classList.remove('locked');try{sessionStorage.setItem('cul_fy26_unlocked','1');}catch(e){}}
+ function init(){
+   try{if(sessionStorage.getItem('cul_fy26_unlocked')==='1'){unlock();return;}}catch(e){}
+   var inp=document.getElementById('pwinput'),btn=document.getElementById('pwbtn'),err=document.getElementById('pwerr');
+   function tryit(){if(sha256(inp.value)===HASH){unlock();}else{err.textContent='Incorrect password';inp.value='';inp.focus();}}
+   btn.addEventListener('click',tryit);
+   inp.addEventListener('keydown',function(e){if(e.key==='Enter')tryit();});
+   inp.focus();
+ }
+ if(document.readyState!=='loading')init();else document.addEventListener('DOMContentLoaded',init);
+})();
+</script>
+<nav id="sidebar">
+  <div class="sbtitle">CUL&middot;Lines FY2026</div>
+  <div class="sbsub">Budget vs 3+9 Projection</div>
+  <a class="navlink active" data-pg="dashboard">Dashboard</a>
+  <div class="sbsec">Trade Groups</div>
+  <span id="navGroups"></span>
+</nav>
+<div class="wrap page active" id="page-dashboard">
+<header>
+  <h1>FY2026 Annual Budget vs 3+9 Projection</h1>
+  <div class="sub">Liner gross-margin basis &middot; Initial Budget vs Revised Budget (Q1 FY2026 actual + Apr&ndash;Dec projection) &middot; Prepared 17 Jun 2026</div>
+  <div class="basis">
+    <b>Basis of comparison.</b> Figures are on the liner trade gross-margin basis used to build the 3+9 reforecast
+    (Initial Budget gross profit US$48.1M). This differs from the fuller corporate P&amp;L in the budget PPT working file
+    (which carries G&amp;A, financial items and other entities). The variance below ties exactly to the projection's own
+    Overall Summary and the trade/lane reconciliation. <b>Several large swings rest on open assumptions</b> &mdash; see notes at the foot.
+  </div>
+</header>
+
+<div class="kpis" id="kpis"></div>
+
+<h2>Full-Year P&amp;L Bridge &mdash; Budget vs 3+9 Projection</h2>
+<div class="card">
+  <table id="bridge"></table>
+  <div class="notes" style="margin-top:10px">The 3+9 projection of GP (US$192.9M) = Q1 actual <b id="q1lab"></b> + Apr&ndash;Dec projection <b id="adlab"></b>.</div>
+</div>
+
+<h2>How the Gross-Profit Gain Builds Up (by Trade)</h2>
+<div class="card"><div class="chartbox" id="wfBox"><canvas id="wf"></canvas></div></div>
+
+<h2>Variance by Trade Group</h2>
+<div class="grid2">
+  <div class="card"><table id="tgtable"></table></div>
+  <div class="card"><div class="chartbox" id="tgBox"><canvas id="tgchart"></canvas></div></div>
+</div>
+<details class="notepanel" id="notesPanel">
+  <summary><span class="arw">Comments &amp; Analysis &mdash; Variance by Trade Group</span><span class="chev">click to expand &middot; auto-saved in this browser</span></summary>
+  <div class="notesbody">
+    <div id="notesBody"></div>
+    <div class="notesbar"><span style="display:flex;gap:8px"><button type="button" id="notesExport">Export notes</button><button type="button" id="notesClear">Clear all notes</button></span><span id="notesSaved">Not yet saved</span></div>
+  </div>
+</details>
+
+<h2>Per-TEU Economics &mdash; Total</h2>
+<div class="kpis" id="perteu"></div>
+
+<h2>Per-TEU Margins by Trade Group</h2>
+<div class="card" style="overflow-x:auto"><table id="tgptTable"></table></div>
+<div class="card notes" style="margin-top:16px" id="ptStory"></div>
+
+<h3 style="font-size:14.5px;margin:26px 0 6px;color:#101a29">Of which: bunker price premium embedded in fixed cost</h3>
+<div class="basis" style="margin-top:0;margin-bottom:14px">
+  This is the basis for the <b>"Bunker&rarr;orig"</b> column above. Taking the <b>projection's own bunker cost</b> (which already carries the 3+9 rates), it backs out the implied consumption and re-prices it at the <b>original budget rates</b> &mdash; HSFO <b>$780&rarr;$460</b>, VLSFO/LSFO <b>$850&rarr;$540</b>, MGO <b>$1,500&rarr;$760</b> per MT. The gap is the <b>price premium</b> sitting inside today's fixed cost/TEU. Per-TEU on projection volume. Unlike the budget, the projection's new long-haul lanes (India &amp; ME, SH3) now run owned/chartered tonnage, so they carry bunker too.
+</div>
+<div class="card" style="overflow-x:auto"><table id="bunkerTable">
+<thead>
+<tr><th>Trade</th><th>Projection bunker<br><span style="font-weight:400;text-transform:none">(current, 3+9 price)</span></th><th>Re-priced @ original</th><th>Embedded price premium</th><th>Premium / TEU</th></tr>
+</thead>
+<tbody>
+<tr><td>TWN</td><td>$7.4M</td><td>$4.7M</td><td class="neg">+$2.7M</td><td class="neg">+$17</td></tr>
+<tr><td>Short-Haul (SH)</td><td>$16.9M</td><td>$10.4M</td><td class="neg">+$6.6M</td><td class="neg">+$36</td></tr>
+<tr><td>LH-Red Sea</td><td>$49.5M</td><td>$31.4M</td><td class="neg">+$18.2M</td><td class="neg">+$170</td></tr>
+<tr><td>LH-India &amp; ME</td><td>$43.8M</td><td>$27.6M</td><td class="neg">+$16.2M</td><td class="neg">+$94</td></tr>
+<tr><td>West Asia (SH2)</td><td>$19.8M</td><td>$12.5M</td><td class="neg">+$7.4M</td><td class="neg">+$87</td></tr>
+<tr><td>AEM</td><td>$31.2M</td><td>$18.6M</td><td class="neg">+$12.5M</td><td class="neg">+$137</td></tr>
+<tr><td>SH3</td><td>$6.6M</td><td>$3.4M</td><td class="neg">+$3.3M</td><td class="neg">+$753</td></tr>
+<tr class="tot"><td>Total</td><td>$175.3M</td><td>$108.4M</td><td class="neg">+$66.9M</td><td class="neg">+$83</td></tr>
+</tbody>
+</table></div>
+<div class="card notes" style="margin-top:16px">
+  <b>Reading it.</b> Of the projection's <b>$175.3M</b> bunker bill, about <b>$66.9M (~38%)</b> is the higher fuel-price assumption rather than more sailing &mdash; roughly <b>$83 per TEU</b> network-wide. If bunker were costed at the original budget rates, fixed cost/TEU would fall most on the heavy fuel users: <b>Red Sea $1,260&rarr;$1,090</b> ($170/TEU), <b>AEM $1,142&rarr;$1,004</b> ($137), <b>West Asia $664&rarr;$577</b> ($87) and the small new <b>SH3 $3,083&rarr;$2,330</b> ($753, on tiny volume). In other words, a material slice of the 3+9's higher fixed cost/TEU is fuel price, not operational &mdash; useful to separate when judging cost performance.
+</div>
+
+<h2>Main Movers on a Per-TEU Basis</h2>
+<div class="card">
+  <div class="chartbox tall" id="bubBox"><canvas id="bubble"></canvas></div>
+  <div class="notes" style="margin-top:8px">Each bubble = a lane. <b>X</b> = projected volume (TEU), <b>Y</b> = gross profit per TEU, <b>size</b> = absolute P&amp;L variance vs budget. Green = favourable variance, red = unfavourable. Lanes far right with low Y are <b>volume-led</b>; high Y are <b>rate/margin-led</b>; below the zero line are <b>loss-making per box</b>.</div>
+</div>
+<div class="card" style="margin-top:16px">
+  <div class="controls">
+    <input id="msearch" placeholder="Filter lane&hellip;" oninput="renderMovers()">
+    <span class="notes" style="align-self:center">Sorted by absolute P&amp;L variance. <span class="new">NEW</span> = not in initial budget.</span>
+  </div>
+  <div class="scroll"><table id="moverTable"></table></div>
+</div>
+
+<h2>Budget vs Q1 Actual &mdash; Cost per TEU</h2>
+<div class="basis" style="margin-top:0;margin-bottom:14px">
+  <b>Per-unit cost, full-year budget vs Q1 (Jan&ndash;Mar) actual.</b> Sources: Initial Budget detail (by lane) and Q1 voyage actuals &mdash; both cost totals tie to the financial summary (budget US$566.4M; Q1 US$98.4M). Group = sum of its services. Caveats: (1) budget volume is on a <b>gross basis</b> (includes internal-slot / SOC fixed-slot TEU), so totals here read lower than the US$964 headline; (2) the Q1 voyage file captures laden <b>COC exactly</b> but under-records SOC fixed-slot volume &mdash; so <b>Laden COC-TEU</b> is the more like-for-like lens (default). (3) West Asia lanes (IMR, JPS, SJA) are mostly slot/SOC business with thin Q1 voyage capture &mdash; treat their per-TEU deltas as unreliable.
+</div>
+<div class="controls" style="margin-bottom:6px">
+  <span style="align-self:center;font-size:13px;color:var(--mut)">Cost-per-TEU basis:</span>
+  <select id="basisSel" onchange="renderCost()">
+    <option value="coc" selected>Laden COC-TEU (like-for-like)</option>
+    <option value="teu">Total TEU (COC + SOC)</option>
+  </select>
+</div>
+<div class="grid2">
+  <div class="card"><table id="cqGroup"></table></div>
+  <div class="card"><div class="chartbox" id="cqBox"><canvas id="cqchart"></canvas></div></div>
+</div>
+<div class="card notes" style="margin-top:16px" id="cqStory"></div>
+<div class="card" style="margin-top:16px">
+  <div class="controls">
+    <input id="cqsearch" placeholder="Filter lane&hellip;" oninput="renderCost()">
+    <span class="notes" style="align-self:center">Sorted by largest cost increase. <span class="new">N/A</span> = no budget (new service) or not sailed in Q1.</span>
+  </div>
+  <div class="scroll"><table id="cqService"></table></div>
+</div>
+
+<h2>Lane-Level P&amp;L Variance</h2>
+<div class="card"><div class="chartbox tall" id="laneBox"><canvas id="lanechart"></canvas></div></div>
+<div class="card" style="margin-top:16px">
+  <div class="controls">
+    <input id="search" placeholder="Filter lane&hellip;" oninput="renderLaneTable()">
+    <select id="grpfilter" onchange="renderLaneTable()"></select>
+    <span class="notes" style="align-self:center"><span class="new">NEW</span> = lane not in initial budget</span>
+  </div>
+  <div class="scroll"><table id="lanetable"></table></div>
+</div>
+
+<h2>Key Assumptions &amp; Caveats Behind the Projection</h2>
+<div class="card notes">
+  <ul>
+    <li><b>Network redesign drives much of the gain.</b> Large positive variances come from lanes <b>not in the initial budget</b> (CGX, SIS, HLX, RES, RTS, GTS), while budgeted lane <b>RCS (&minus;US$13.0M)</b> is dropped &mdash; partly new-service launches vs discontinued ones, not pure same-store improvement.</li>
+    <li><b>CGX +US$58.2M</b> assumes ISP CN&ndash;PKG revenue at US$300/TEU on ~99k TEU &mdash; the biggest swing and highly assumption-sensitive; per-box GP is thin (~US$585).</li>
+    <li><b>REX / Red Sea +US$50.6M:</b> Red Sea OFT rate is missing; currently estimated on Trade's weighted-average rate (&asymp;US$8.5M impact). Trade input still required.</li>
+    <li><b>AEKLF import land cost</b> assumed at US$1,000/TEU (&asymp;US$28M impact).</li>
+    <li><b>HLX</b> ISP TH&ndash;PKG assumed US$200/TEU, PKG&ndash;TH US$50/TEU; <b>AEM ECCL</b> container cost assumed equal to COC (&asymp;US$1.5M).</li>
+    <li><b>SGX RACINE 2616WE excluded</b> (missing volume/OFT); estimated impact &asymp;US$3.4M. SGX vessel cost US$3.2M; ISP revenue booked under SGX, cost under REX.</li>
+  </ul>
+</div>
+
+<div class="foot">
+  Source: <i>FY2026 3+9 Projection_Gross_Margin-Detail @20260617 1500.xlsx</i> (Overall Summary &amp; PPT_Liner Figure Summary_Final) and
+  <i>FY2026 Budget -PPT Working File_20260305.xlsx</i>. P&amp;L values US$ unless noted; per-TEU figures in US$/TEU. Variance = Projection &minus; Budget; positive = favourable.
+  Trade-group and lane variances reconcile to the +US$144.8M total.
+</div>
+</div>
+<div class="wrap page" id="page-detail"></div>
+
+<script>
+const DATA={"bridge": {"voy": [1312.0, 1191.0], "bsa": [441086.0, 606023.0], "vol": [587758.042772737, 802841.7116105232], "coc": [518270.204733356, 664707.3072223689], "soc": [69487.8380393812, 138134.40438815427], "rev": [614522623.327559, 1138415953.19597], "var": [210676221.179774, 448221166.5527277], "fix": [355713256.453208, 497257766.04093635], "tc": [566389477.632982, 945478932.593664], "gp": [48133145.694577, 192937020.602306], "q1_gp": 9385826.72538328, "aprdec_gp": 183551193.87692273}, "groups": ["TWN", "SH", "LH-Red Sea", "LH-India & Middle East", "East Africa", "SH2", "AEM", "SH3"], "tg": {"TWN": {"rev_pl": 25051.287986098865, "init_pl": 18429.348487915126, "var_pl": 6621.9394981837395}, "SH": {"rev_pl": -2380.8265443432683, "init_pl": 2617.1228780765687, "var_pl": -4997.949422419837}, "LH-Red Sea": {"rev_pl": 70197.5623200757, "init_pl": 22656.432318851643, "var_pl": 47541.13000122405}, "LH-India & Middle East": {"rev_pl": 79211.85689496793, "init_pl": -7560.078960545511, "var_pl": 86771.93585551344}, "East Africa": {"rev_pl": 1684.9696247617626, "init_pl": 1581.15369920219, "var_pl": 103.81592555957263}, "SH2": {"rev_pl": 12970.731582672648, "init_pl": -3739.7490541482002, "var_pl": 16710.48063682085}, "AEM": {"rev_pl": 9801.261569632035, "init_pl": 14148.916325225504, "var_pl": -4347.6547555934685}, "SH3": {"rev_pl": -3599.822831559535, "init_pl": 0.0, "var_pl": -3599.822831559535}}, "lanes": [{"group": "TWN", "lane": "ST1", "rev_pl": 9511.259795466707, "init_pl": 9400.68100486988, "var_pl": 110.57879059682637}, {"group": "TWN", "lane": "ST3", "rev_pl": 8436.75359720083, "init_pl": 5022.11560469798, "var_pl": 3414.6379925028496}, {"group": "TWN", "lane": "HDT", "rev_pl": 6999.864459586876, "init_pl": 3901.1013647526697, "var_pl": 3098.7630948342066}, {"group": "TWN", "lane": "TH3", "rev_pl": 103.41013384443806, "init_pl": 105.45051359459501, "var_pl": -2.0403797501569443}, {"group": "Short-Haul (SH)", "lane": "NP2", "rev_pl": -96.99626177126902, "init_pl": 898.4034660406301, "var_pl": -995.3997278118991}, {"group": "Short-Haul (SH)", "lane": "BDX", "rev_pl": 55.74634071671585, "init_pl": -724.406362820729, "var_pl": 780.1527035374448}, {"group": "Short-Haul (SH)", "lane": "CCT", "rev_pl": 1577.6035589721105, "init_pl": 615.2068804544799, "var_pl": 962.3966785176306}, {"group": "Short-Haul (SH)", "lane": "CH1", "rev_pl": -452.8356780848476, "init_pl": -667.278369199724, "var_pl": 214.44269111487642}, {"group": "Short-Haul (SH)", "lane": "NSX", "rev_pl": -964.531271965081, "init_pl": 256.38538774308, "var_pl": -1220.916659708161}, {"group": "Short-Haul (SH)", "lane": "CP8", "rev_pl": 931.6879400829907, "init_pl": 404.187164392007, "var_pl": 527.5007756909838}, {"group": "Short-Haul (SH)", "lane": "CST", "rev_pl": -4541.559497118098, "init_pl": 695.625180881588, "var_pl": -5237.184677999686}, {"group": "Short-Haul (SH)", "lane": "IQH", "rev_pl": 133.05939219542893, "init_pl": 220.410519932182, "var_pl": -87.35112773675309}, {"group": "Short-Haul (SH)", "lane": "JCT", "rev_pl": 437.3801476287026, "init_pl": 410.201763283701, "var_pl": 27.178384345001632}, {"group": "Short-Haul (SH)", "lane": "KHX", "rev_pl": 116.51548243829211, "init_pl": 172.41581566275198, "var_pl": -55.90033322445987}, {"group": "Short-Haul (SH)", "lane": "SL1", "rev_pl": -225.16162390889627, "init_pl": 0.0, "var_pl": -225.16162390889627}, {"group": "Short-Haul (SH)", "lane": "SVP", "rev_pl": 648.2649264706959, "init_pl": 335.971431706602, "var_pl": 312.29349476409385}, {"group": "Long-Haul Red Sea", "lane": "REX", "rev_pl": 60206.84725680778, "init_pl": 9620.51872077894, "var_pl": 50586.328536028836}, {"group": "Long-Haul Red Sea", "lane": "RES", "rev_pl": 9990.71506326789, "init_pl": 0.0, "var_pl": 9990.71506326789}, {"group": "Long-Haul Red Sea", "lane": "RCS", "rev_pl": 0.0, "init_pl": 13035.9135980727, "var_pl": -13035.9135980727}, {"group": "East Africa", "lane": "MFX", "rev_pl": 1684.9696247617626, "init_pl": 1581.15369920219, "var_pl": 103.81592555957263}, {"group": "Long-Haul India & ME", "lane": "JFX", "rev_pl": -241.88442823369996, "init_pl": -551.47586803076, "var_pl": 309.59143979706005}, {"group": "Long-Haul India & ME", "lane": "MGA", "rev_pl": 102.13345222480109, "init_pl": 359.49731298618, "var_pl": -257.36386076137893}, {"group": "Long-Haul India & ME", "lane": "SGS", "rev_pl": 305.9818631608232, "init_pl": -240.651564364841, "var_pl": 546.6334275256642}, {"group": "Long-Haul India & ME", "lane": "CGS", "rev_pl": -1896.7166255854008, "init_pl": 0.0, "var_pl": -1896.7166255854008}, {"group": "Long-Haul India & ME", "lane": "CGX", "rev_pl": 58232.21945932196, "init_pl": 0.0, "var_pl": 58232.21945932196}, {"group": "Long-Haul India & ME", "lane": "LHT", "rev_pl": 288.35000072359196, "init_pl": 0.0, "var_pl": 288.35000072359196}, {"group": "Long-Haul India & ME", "lane": "SGX", "rev_pl": -369.90535134873767, "init_pl": 0.0, "var_pl": -369.90535134873767}, {"group": "Long-Haul India & ME", "lane": "CI3", "rev_pl": -986.1483529545949, "init_pl": -4145.5563592988, "var_pl": 3159.408006344205}, {"group": "Long-Haul India & ME", "lane": "CSX", "rev_pl": 16.025169160327778, "init_pl": -1136.43593583411, "var_pl": 1152.4611049944378}, {"group": "Long-Haul India & ME", "lane": "CWS", "rev_pl": -364.4301251801903, "init_pl": -1845.4565460031802, "var_pl": 1481.0264208229898}, {"group": "Long-Haul India & ME", "lane": "HLX", "rev_pl": 11586.303660080439, "init_pl": 0.0, "var_pl": 11586.303660080439}, {"group": "Long-Haul India & ME", "lane": "SIS", "rev_pl": 12539.928173598551, "init_pl": 0.0, "var_pl": 12539.928173598551}, {"group": "West Asia (SH2)", "lane": "IMR", "rev_pl": 2865.5608777539965, "init_pl": -3598.19593177454, "var_pl": 6463.756809528537}, {"group": "West Asia (SH2)", "lane": "JPS", "rev_pl": 1556.0202020703855, "init_pl": 1448.770528, "var_pl": 107.24967407038548}, {"group": "West Asia (SH2)", "lane": "SJA", "rev_pl": 2132.78861848169, "init_pl": -1590.32365037366, "var_pl": 3723.1122688553496}, {"group": "West Asia (SH2)", "lane": "WAT", "rev_pl": -34.7700698670695, "init_pl": 0.0, "var_pl": -34.7700698670695}, {"group": "West Asia (SH2)", "lane": "GTS", "rev_pl": 529.883491397242, "init_pl": 0.0, "var_pl": 529.883491397242}, {"group": "West Asia (SH2)", "lane": "RTS", "rev_pl": 5921.248462836401, "init_pl": 0.0, "var_pl": 5921.248462836401}, {"group": "AEM", "lane": "AM1", "rev_pl": 9801.261569632035, "init_pl": 14479.1607002255, "var_pl": -4677.899130593465}, {"group": "AEM", "lane": "NTE", "rev_pl": 0.0, "init_pl": -330.244374999997, "var_pl": 330.244374999997}, {"group": "AEM", "lane": "ECCL", "rev_pl": 0.0, "init_pl": 0.0, "var_pl": 0.0}, {"group": "SH3", "lane": "MES", "rev_pl": -4343.525489723872, "init_pl": 0.0, "var_pl": -4343.525489723872}, {"group": "SH3", "lane": "NAF", "rev_pl": 743.7026581643365, "init_pl": 0.0, "var_pl": 743.7026581643365}],
+"tgpt": {"TWN":{"i_teu":160964,"r_teu":159691,"i_revT":401,"r_revT":462,"i_vcT":143,"r_vcT":142,"i_fcT":144,"r_fcT":162,"r_fcT_adj":145,"i_gpT":114,"r_gpT":157},"SH":{"i_teu":203004,"r_teu":182861,"i_revT":491,"r_revT":517,"i_vcT":222,"r_vcT":211,"i_fcT":257,"r_fcT":318,"r_fcT_adj":282,"i_gpT":13,"r_gpT":-13},"LH-Red Sea":{"i_teu":91591,"r_teu":107002,"i_revT":1927,"r_revT":2493,"i_vcT":474,"r_vcT":577,"i_fcT":1205,"r_fcT":1260,"r_fcT_adj":1090,"i_gpT":247,"r_gpT":656},"LH-India & Middle East":{"i_teu":54173,"r_teu":170736,"i_revT":1420,"r_revT":2538,"i_vcT":969,"r_vcT":1345,"i_fcT":591,"r_fcT":729,"r_fcT_adj":634,"i_gpT":-140,"r_gpT":464},"East Africa":{"i_teu":2500,"r_teu":2404,"i_revT":2086,"r_revT":1960,"i_vcT":550,"r_vcT":354,"i_fcT":904,"r_fcT":906,"r_fcT_adj":906,"i_gpT":632,"r_gpT":701},"SH2":{"i_teu":66002,"r_teu":84580,"i_revT":844,"r_revT":1071,"i_vcT":218,"r_vcT":253,"i_fcT":683,"r_fcT":664,"r_fcT_adj":577,"i_gpT":-57,"r_gpT":153},"AEM":{"i_teu":102145,"r_teu":91224,"i_revT":1331,"r_revT":1805,"i_vcT":304,"r_vcT":555,"i_fcT":888,"r_fcT":1142,"r_fcT_adj":1004,"i_gpT":139,"r_gpT":107},"SH3":{"i_teu":0,"r_teu":4344,"i_revT":0,"r_revT":2364,"i_vcT":0,"r_vcT":110,"i_fcT":0,"r_fcT":3083,"r_fcT_adj":2330,"i_gpT":0,"r_gpT":-829}},
+"movers": [{"lane": "CGX", "group": "Long-Haul India & ME", "teu": 99462, "revT": 3214, "costT": 2629, "gpT": 585, "var_pl": 58232.2, "isnew": true, "driver": "New service"}, {"lane": "REX", "group": "Long-Haul Red Sea", "teu": 95701, "revT": 2505, "costT": 1876, "gpT": 629, "var_pl": 50586.3, "isnew": false, "driver": "High margin/box"}, {"lane": "SIS", "group": "Long-Haul India & ME", "teu": 17930, "revT": 1527, "costT": 828, "gpT": 699, "var_pl": 12539.9, "isnew": true, "driver": "New service"}, {"lane": "HLX", "group": "Long-Haul India & ME", "teu": 29735, "revT": 1216, "costT": 826, "gpT": 390, "var_pl": 11586.3, "isnew": true, "driver": "New service"}, {"lane": "RES", "group": "Long-Haul Red Sea", "teu": 11301, "revT": 2391, "costT": 1507, "gpT": 884, "var_pl": 9990.7, "isnew": true, "driver": "New service"}, {"lane": "IMR", "group": "West Asia (SH2)", "teu": 30766, "revT": 963, "costT": 870, "gpT": 93, "var_pl": 6463.8, "isnew": false, "driver": "Mixed"}, {"lane": "RTS", "group": "West Asia (SH2)", "teu": 28411, "revT": 1106, "costT": 897, "gpT": 208, "var_pl": 5921.2, "isnew": true, "driver": "New service"}, {"lane": "CST", "group": "Short-Haul (SH)", "teu": 50524, "revT": 447, "costT": 537, "gpT": -90, "var_pl": -5237.2, "isnew": false, "driver": "Loss per box"}, {"lane": "AM1", "group": "AEM", "teu": 91224, "revT": 1805, "costT": 1697, "gpT": 107, "var_pl": -4677.9, "isnew": false, "driver": "Margin/volume erosion"}, {"lane": "MES", "group": "SH3", "teu": 3749, "revT": 1175, "costT": 2333, "gpT": -1159, "var_pl": -4343.5, "isnew": true, "driver": "Loss per box"}, {"lane": "SJA", "group": "West Asia (SH2)", "teu": 18939, "revT": 1088, "costT": 976, "gpT": 113, "var_pl": 3723.1, "isnew": false, "driver": "Mixed"}, {"lane": "ST3", "group": "TWN", "teu": 44757, "revT": 580, "costT": 391, "gpT": 189, "var_pl": 3414.6, "isnew": false, "driver": "Volume-led"}, {"lane": "CI3", "group": "Long-Haul India & ME", "teu": 4661, "revT": 1564, "costT": 1776, "gpT": -212, "var_pl": 3159.4, "isnew": false, "driver": "Mixed"}, {"lane": "HDT", "group": "TWN", "teu": 74347, "revT": 294, "costT": 199, "gpT": 94, "var_pl": 3098.8, "isnew": false, "driver": "Volume-led"}, {"lane": "CGS", "group": "Long-Haul India & ME", "teu": 6412, "revT": 3466, "costT": 3762, "gpT": -296, "var_pl": -1896.7, "isnew": true, "driver": "Loss per box"}, {"lane": "CWS", "group": "Long-Haul India & ME", "teu": 2315, "revT": 1958, "costT": 2116, "gpT": -157, "var_pl": 1481.0, "isnew": false, "driver": "Mixed"}, {"lane": "NSX", "group": "Short-Haul (SH)", "teu": 36613, "revT": 406, "costT": 432, "gpT": -26, "var_pl": -1220.9, "isnew": false, "driver": "Loss per box"}, {"lane": "CSX", "group": "Long-Haul India & ME", "teu": 1399, "revT": 1509, "costT": 1498, "gpT": 11, "var_pl": 1152.5, "isnew": false, "driver": "Mixed"}, {"lane": "NP2", "group": "Short-Haul (SH)", "teu": 14216, "revT": 969, "costT": 976, "gpT": -7, "var_pl": -995.4, "isnew": false, "driver": "Loss per box"}, {"lane": "CCT", "group": "Short-Haul (SH)", "teu": 39190, "revT": 529, "costT": 488, "gpT": 40, "var_pl": 962.4, "isnew": false, "driver": "Mixed"}, {"lane": "BDX", "group": "Short-Haul (SH)", "teu": 7723, "revT": 341, "costT": 333, "gpT": 7, "var_pl": 780.2, "isnew": false, "driver": "Mixed"}, {"lane": "NAF", "group": "SH3", "teu": 595, "revT": 9855, "costT": 8606, "gpT": 1249, "var_pl": 743.7, "isnew": true, "driver": "New service"}, {"lane": "SGS", "group": "Long-Haul India & ME", "teu": 2813, "revT": 989, "costT": 880, "gpT": 109, "var_pl": 546.6, "isnew": false, "driver": "Mixed"}, {"lane": "GTS", "group": "West Asia (SH2)", "teu": 1363, "revT": 1242, "costT": 853, "gpT": 389, "var_pl": 529.9, "isnew": true, "driver": "New service"}, {"lane": "CP8", "group": "Short-Haul (SH)", "teu": 5646, "revT": 854, "costT": 689, "gpT": 165, "var_pl": 527.5, "isnew": false, "driver": "Mixed"}, {"lane": "SGX", "group": "Long-Haul India & ME", "teu": 2867, "revT": 1735, "costT": 1864, "gpT": -129, "var_pl": -369.9, "isnew": true, "driver": "Loss per box"}, {"lane": "SVP", "group": "Short-Haul (SH)", "teu": 4770, "revT": 747, "costT": 611, "gpT": 136, "var_pl": 312.3, "isnew": false, "driver": "Mixed"}, {"lane": "JFX", "group": "Long-Haul India & ME", "teu": 2417, "revT": 1723, "costT": 1823, "gpT": -100, "var_pl": 309.6, "isnew": false, "driver": "Mixed"}, {"lane": "LHT", "group": "Long-Haul India & ME", "teu": 302, "revT": 1955, "costT": 1001, "gpT": 955, "var_pl": 288.4, "isnew": true, "driver": "New service"}, {"lane": "MGA", "group": "Long-Haul India & ME", "teu": 423, "revT": 3389, "costT": 3148, "gpT": 241, "var_pl": -257.4, "isnew": false, "driver": "Margin/volume erosion"}, {"lane": "SL1", "group": "Short-Haul (SH)", "teu": 424, "revT": 189, "costT": 720, "gpT": -531, "var_pl": -225.2, "isnew": true, "driver": "Loss per box"}, {"lane": "CH1", "group": "Short-Haul (SH)", "teu": 6644, "revT": 387, "costT": 456, "gpT": -68, "var_pl": 214.4, "isnew": false, "driver": "Mixed"}, {"lane": "ST1", "group": "TWN", "teu": 38042, "revT": 650, "costT": 400, "gpT": 250, "var_pl": 110.6, "isnew": false, "driver": "Mixed"}, {"lane": "JPS", "group": "West Asia (SH2)", "teu": 5034, "revT": 1427, "costT": 1118, "gpT": 309, "var_pl": 107.2, "isnew": false, "driver": "Mixed"}, {"lane": "MFX", "group": "Long-Haul India & ME", "teu": 2404, "revT": 1960, "costT": 1260, "gpT": 701, "var_pl": 103.8, "isnew": false, "driver": "High margin/box"}, {"lane": "IQH", "group": "Short-Haul (SH)", "teu": 4445, "revT": 470, "costT": 440, "gpT": 30, "var_pl": -87.4, "isnew": false, "driver": "Margin/volume erosion"}, {"lane": "KHX", "group": "Short-Haul (SH)", "teu": 3578, "revT": 414, "costT": 381, "gpT": 33, "var_pl": -55.9, "isnew": false, "driver": "Margin/volume erosion"}, {"lane": "WAT", "group": "West Asia (SH2)", "teu": 67, "revT": 538, "costT": 1057, "gpT": -519, "var_pl": -34.8, "isnew": true, "driver": "Loss per box"}, {"lane": "JCT", "group": "Short-Haul (SH)", "teu": 9089, "revT": 578, "costT": 530, "gpT": 48, "var_pl": 27.2, "isnew": false, "driver": "Mixed"}, {"lane": "TH3", "group": "TWN", "teu": 2545, "revT": 487, "costT": 446, "gpT": 41, "var_pl": -2.0, "isnew": false, "driver": "Margin/volume erosion"}]};
+
+const fmtM=v=>(v/1e6).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1});
+const fmt0=v=>Math.round(v).toLocaleString('en-US');
+const k=v=>v.toLocaleString('en-US',{maximumFractionDigits:1});
+const sign=v=>(v>=0?'+':'');
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const B=DATA.bridge;
+
+// KPIs
+const kpiDefs=[
+ {lbl:'Gross Profit',b:B.gp[0],p:B.gp[1],money:1},
+ {lbl:'GPM %',b:B.gp[0]/B.rev[0]*100,p:B.gp[1]/B.rev[1]*100,pct:1},
+ {lbl:'Total Revenue',b:B.rev[0],p:B.rev[1],money:1},
+ {lbl:'Total Volume (TEU)',b:B.vol[0],p:B.vol[1]},
+];
+document.getElementById('kpis').innerHTML=kpiDefs.map(d=>{
+ let bd,pd,delta,dc;
+ if(d.money){bd='$'+fmtM(d.b)+'M';pd='$'+fmtM(d.p)+'M';const dv=d.p-d.b;delta=sign(dv)+'$'+fmtM(dv)+'M ('+sign((dv/d.b)*100)+(dv/d.b*100).toFixed(0)+'%)';dc=dv>=0?'pos':'neg';}
+ else if(d.pct){bd=d.b.toFixed(1)+'%';pd=d.p.toFixed(1)+'%';const dv=d.p-d.b;delta=sign(dv)+dv.toFixed(1)+' pts';dc=dv>=0?'pos':'neg';}
+ else {bd=fmt0(d.b);pd=fmt0(d.p);const dv=d.p-d.b;delta=sign(dv)+fmt0(dv)+' ('+sign(dv/d.b*100)+(dv/d.b*100).toFixed(0)+'%)';dc=dv>=0?'pos':'neg';}
+ return '<div class="kpi"><div class="lbl">'+d.lbl+'</div><div class="big">'+pd+'</div>'+
+   '<div class="row">Budget: '+bd+'</div><div class="delta '+dc+'">'+delta+' vs budget</div></div>';
+}).join('');
+
+// Bridge
+const rows=[['No. of round voyages',B.voy,'n'],['BSA',B.bsa,'n'],['Total volume (TEU)',B.vol,'n'],
+ ['  COC TEU',B.coc,'n'],['  SOC TEU',B.soc,'n'],['Total revenue',B.rev,'m'],
+ ['Total variable cost',B.var,'m'],['Total fixed cost',B.fix,'m'],['Total cost',B.tc,'m'],['Gross profit / P&L',B.gp,'m']];
+let bh='<thead><tr><th>Item</th><th>Annual Budget</th><th>3+9 Projection</th><th>Variance</th><th>&Delta;%</th></tr></thead><tbody>';
+rows.forEach(([lab,a,t])=>{const bv=a[0],pv=a[1],dv=pv-bv;const fav=(lab.includes('cost'))?dv<0:dv>0;
+ const f=t==='m'?(x=>'$'+fmtM(x)+'M'):(x=>fmt0(x));const dvs=t==='m'?(sign(dv)+'$'+fmtM(dv)+'M'):(sign(dv)+fmt0(dv));
+ const isgp=lab.includes('Gross');
+ bh+='<tr class="'+(isgp?'tot':'')+'"><td>'+lab+'</td><td>'+f(bv)+'</td><td>'+f(pv)+'</td>'+
+   '<td class="'+(fav?'pos':'neg')+'">'+dvs+'</td><td class="'+(fav?'pos':'neg')+'">'+sign(dv/bv*100)+(dv/bv*100).toFixed(0)+'%</td></tr>';});
+const gpmB=B.gp[0]/B.rev[0]*100,gpmP=B.gp[1]/B.rev[1]*100;
+bh+='<tr class="tot"><td>GPM %</td><td>'+gpmB.toFixed(1)+'%</td><td>'+gpmP.toFixed(1)+'%</td><td class="pos">+'+(gpmP-gpmB).toFixed(1)+' pts</td><td></td></tr></tbody>';
+document.getElementById('bridge').innerHTML=bh;
+document.getElementById('q1lab').textContent='$'+fmtM(B.q1_gp)+'M';
+document.getElementById('adlab').textContent='$'+fmtM(B.aprdec_gp)+'M';
+
+// Waterfall
+const order=DATA.groups.slice().sort((a,b)=>DATA.tg[b].var_pl-DATA.tg[a].var_pl);
+const labelsWF=['Budget GP'].concat(order).concat(['Revised GP']);
+let run=B.gp[0]/1e6;const base=[],bar=[],colors=[];
+base.push(0);bar.push(run);colors.push(css('--accent'));
+order.forEach(g=>{const v=DATA.tg[g].var_pl*1000/1e6;if(v>=0){base.push(run);bar.push(v);}else{base.push(run+v);bar.push(-v);}run+=v;colors.push(v>=0?css('--pos'):css('--neg'));});
+base.push(0);bar.push(run);colors.push(css('--gold'));
+new Chart(document.getElementById('wf'),{type:'bar',data:{labels:labelsWF,
+ datasets:[{data:base,backgroundColor:'transparent',stack:'s'},{data:bar,backgroundColor:colors,stack:'s',borderRadius:3}]},
+ options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.raw.toFixed(1)+'M'}}},
+  scales:{x:{ticks:{color:css('--mut'),maxRotation:40,minRotation:40},grid:{display:false}},
+   y:{ticks:{color:css('--mut'),callback:v=>'$'+v+'M'},grid:{color:css('--line')}}}}});
+
+// Trade group table + chart
+let th='<thead><tr><th>Trade</th><th>Budget P&L</th><th>Proj P&L</th><th>Variance</th></tr></thead><tbody>';
+order.forEach(g=>{const t=DATA.tg[g];const dv=t.var_pl*1000;
+ th+='<tr><td>'+g+'</td><td>$'+fmtM(t.init_pl*1000)+'M</td><td>$'+fmtM(t.rev_pl*1000)+'M</td><td class="'+(dv>=0?'pos':'neg')+'">'+sign(dv)+'$'+fmtM(dv)+'M</td></tr>';});
+th+='<tr class="tot"><td>Total</td><td>$'+fmtM(B.gp[0])+'M</td><td>$'+fmtM(B.gp[1])+'M</td><td class="pos">+$'+fmtM(B.gp[1]-B.gp[0])+'M</td></tr></tbody>';
+document.getElementById('tgtable').innerHTML=th;
+new Chart(document.getElementById('tgchart'),{type:'bar',data:{labels:order,
+ datasets:[{data:order.map(g=>DATA.tg[g].var_pl*1000/1e6),backgroundColor:order.map(g=>DATA.tg[g].var_pl>=0?css('--pos'):css('--neg')),borderRadius:3}]},
+ options:{maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},title:{display:true,text:'P&L variance by trade (US$M)',color:css('--mut')},tooltip:{callbacks:{label:c=>'$'+c.raw.toFixed(1)+'M'}}},
+  scales:{x:{ticks:{color:css('--mut'),callback:v=>'$'+v+'M'},grid:{color:css('--line')}},y:{ticks:{color:css('--ink')},grid:{display:false}}}}});
+
+// Per-TEU overall cards
+const pt=[{lbl:'Revenue / TEU',b:B.rev[0]/B.vol[0],p:B.rev[1]/B.vol[1]},
+ {lbl:'Variable cost / TEU',b:B.var[0]/B.vol[0],p:B.var[1]/B.vol[1],cost:1},
+ {lbl:'Fixed cost / TEU',b:B.fix[0]/B.vol[0],p:B.fix[1]/B.vol[1],cost:1},
+ {lbl:'Gross profit / TEU',b:B.gp[0]/B.vol[0],p:B.gp[1]/B.vol[1]}];
+document.getElementById('perteu').innerHTML=pt.map(d=>{const dv=d.p-d.b;const fav=d.cost?dv<0:dv>0;
+ return '<div class="kpi"><div class="lbl">'+d.lbl+'</div><div class="big">$'+fmt0(d.p)+'</div><div class="row">Budget: $'+fmt0(d.b)+'</div><div class="delta '+(fav?'pos':'neg')+'">'+sign(dv)+'$'+fmt0(dv)+' / TEU</div></div>';}).join('');
+
+// Per-TEU by trade group table (full-width, Rev/VC/FC/GP per TEU, budget vs projection)
+const gpord=DATA.groups.slice().sort((a,b)=>(DATA.tgpt[b].r_gpT-DATA.tgpt[b].i_gpT)-(DATA.tgpt[a].r_gpT-DATA.tgpt[a].i_gpT));
+const grpStart='border-left:2px solid var(--line)';
+const BUNK_PREM=66868626; // total embedded bunker price premium (US$)
+let pth='<thead>'+
+ '<tr><th rowspan="2">Trade</th>'+
+ '<th colspan="2" style="text-align:center;'+grpStart+'">TEU</th>'+
+ '<th colspan="2" style="text-align:center;'+grpStart+'">Revenue / TEU</th>'+
+ '<th colspan="2" style="text-align:center;'+grpStart+'">Variable cost / TEU</th>'+
+ '<th colspan="3" style="text-align:center;'+grpStart+'">Fixed cost / TEU</th>'+
+ '<th colspan="2" style="text-align:center;'+grpStart+'">Gross profit / TEU</th></tr>'+
+ '<tr>'+
+ '<th style="'+grpStart+'">Budget</th><th>Proj</th>'+
+ '<th style="'+grpStart+'">Budget</th><th>Proj</th>'+
+ '<th style="'+grpStart+'">Budget</th><th>Proj</th>'+
+ '<th style="'+grpStart+'">Budget</th><th>Current</th><th>Bunker&rarr;orig</th>'+
+ '<th style="'+grpStart+'">Budget</th><th>Proj</th></tr></thead><tbody>';
+const cell=(v,s)=>'<td'+(s?' style="'+s+'"':'')+'>$'+fmt0(v)+'</td>';
+const gpcell=(b,p,s)=>'<td'+(s?' style="'+s+'"':'')+' class="'+(p>=b?'pos':'neg')+'">$'+fmt0(p)+'</td>';
+gpord.forEach(g=>{const t=DATA.tgpt[g];
+ pth+='<tr><td>'+g+'</td>'+
+   '<td style="'+grpStart+'">'+fmt0(t.i_teu)+'</td><td>'+fmt0(t.r_teu)+'</td>'+
+   cell(t.i_revT,grpStart)+cell(t.r_revT)+
+   cell(t.i_vcT,grpStart)+cell(t.r_vcT)+
+   cell(t.i_fcT,grpStart)+cell(t.r_fcT)+'<td class="pos">$'+fmt0(t.r_fcT_adj)+'</td>'+
+   '<td style="'+grpStart+'">$'+fmt0(t.i_gpT)+'</td>'+gpcell(t.i_gpT,t.r_gpT)+'</tr>';});
+const T={revT:[B.rev[0]/B.vol[0],B.rev[1]/B.vol[1]],vcT:[B.var[0]/B.vol[0],B.var[1]/B.vol[1]],fcT:[B.fix[0]/B.vol[0],B.fix[1]/B.vol[1]],gpT:[B.gp[0]/B.vol[0],B.gp[1]/B.vol[1]]};
+const fcAdjTot=(B.fix[1]-BUNK_PREM)/B.vol[1];
+pth+='<tr class="tot"><td>Total</td>'+
+ '<td style="'+grpStart+'">'+fmt0(B.vol[0])+'</td><td>'+fmt0(B.vol[1])+'</td>'+
+ cell(T.revT[0],grpStart)+cell(T.revT[1])+
+ cell(T.vcT[0],grpStart)+cell(T.vcT[1])+
+ cell(T.fcT[0],grpStart)+cell(T.fcT[1])+'<td class="pos">$'+fmt0(fcAdjTot)+'</td>'+
+ '<td style="'+grpStart+'">$'+fmt0(T.gpT[0])+'</td>'+gpcell(T.gpT[0],T.gpT[1])+'</tr></tbody>';
+document.getElementById('tgptTable').innerHTML=pth;
+
+// Per-TEU narrative
+document.getElementById('ptStory').innerHTML=
+ '<b>What the per-box view shows.</b><ul>'+
+ '<li><b>Rate-led — Red Sea.</b> LH-Red Sea GP/TEU jumps <b>$247 &rarr; $656</b> (+$409/box) on Red Sea freight; REX contributes +$50.6M at $629 GP/TEU and new lane RES earns the best margin in the network at <b>$884/box</b>.</li>'+
+ '<li><b>Volume-led, thin-margin — India &amp; Middle East.</b> Volume <b>triples</b> (57k &rarr; 173k TEU) via new services and GP/TEU swings &minus;$105 &rarr; +$467. But the single biggest contributor, <b>CGX (+$58.2M)</b>, runs ~99k TEU at only <b>$585 GP/box</b> &mdash; an absolute-dollar, volume play resting on the $300/TEU ISP assumption rather than rich margins.</li>'+
+ '<li><b>Erosion — Short-Haul.</b> The only group whose per-box margin turns negative: <b>$13 &rarr; &minus;$13/TEU</b>, with volume also down ~20k TEU. <b>CST</b> is the worst single box: &minus;$90 GP/TEU on 50.5k TEU (&minus;$5.2M).</li>'+
+ '<li><b>AEM</b> stays a big absolute earner but per-box margin slips <b>$139 &rarr; $107</b> on lower volume; <b>SH3 (MES)</b> is a new service losing <b>&minus;$1,159/box</b>.</li>'+
+ '</ul>';
+
+// Bubble chart of movers
+function tagClass(d){if(d.includes('Loss'))return css('--neg');if(d.includes('New'))return css('--gold');if(d.includes('Volume'))return css('--accent');if(d.includes('High'))return css('--pos');return '#9aa7b8';}
+const topB=DATA.movers.slice(0,22);
+new Chart(document.getElementById('bubble'),{type:'bubble',data:{datasets:[
+ {label:'Favourable',data:topB.filter(m=>m.var_pl>=0).map(m=>({x:m.teu,y:m.gpT,r:Math.max(4,Math.sqrt(Math.abs(m.var_pl))/4),lane:m.lane,v:m.var_pl})),backgroundColor:'rgba(26,138,90,.55)',borderColor:css('--pos')},
+ {label:'Unfavourable',data:topB.filter(m=>m.var_pl<0).map(m=>({x:m.teu,y:m.gpT,r:Math.max(4,Math.sqrt(Math.abs(m.var_pl))/4),lane:m.lane,v:m.var_pl})),backgroundColor:'rgba(204,59,50,.55)',borderColor:css('--neg')}]},
+ options:{maintainAspectRatio:false,plugins:{legend:{labels:{color:css('--ink')}},
+  tooltip:{callbacks:{label:c=>c.raw.lane+': '+fmt0(c.raw.x)+' TEU, $'+fmt0(c.raw.y)+'/TEU GP, var '+sign(c.raw.v)+'$'+fmtM(c.raw.v*1000)+'M'}}},
+  scales:{x:{title:{display:true,text:'Projected volume (TEU)',color:css('--mut')},ticks:{color:css('--mut'),callback:v=>fmt0(v)},grid:{color:css('--line')}},
+   y:{title:{display:true,text:'Gross profit per TEU (US$)',color:css('--mut')},ticks:{color:css('--mut'),callback:v=>'$'+v},grid:{color:css('--line')}}}}});
+
+// Movers table
+function tagPill(d){let c='t-mix';if(d.includes('Loss'))c='t-loss';else if(d.includes('New'))c='t-new';else if(d.includes('Volume'))c='t-vol';else if(d.includes('High'))c='t-rate';else if(d.includes('erosion')||d.includes('Margin'))c='t-loss';
+ return '<span class="tag '+c+'">'+d+'</span>';}
+function renderMovers(){const q=document.getElementById('msearch').value.toLowerCase();
+ let rows=DATA.movers.filter(m=>m.lane.toLowerCase().includes(q));
+ let h='<thead><tr><th>Lane</th><th>Trade</th><th>TEU</th><th>Rev/TEU</th><th>Cost/TEU</th><th>GP/TEU</th><th>P&L var</th><th>Driver</th></tr></thead><tbody>';
+ rows.forEach(m=>{const dv=m.var_pl*1000;
+  h+='<tr><td>'+m.lane+(m.isnew?'<span class="new">NEW</span>':'')+'</td><td style="text-align:left">'+m.group+'</td>'+
+    '<td>'+fmt0(m.teu)+'</td><td>$'+fmt0(m.revT)+'</td><td>$'+fmt0(m.costT)+'</td>'+
+    '<td class="'+(m.gpT>=0?'pos':'neg')+'">$'+fmt0(m.gpT)+'</td>'+
+    '<td class="'+(dv>=0?'pos':'neg')+'">'+sign(dv)+'$'+fmtM(dv)+'M</td>'+
+    '<td style="text-align:left">'+tagPill(m.driver)+'</td></tr>';});
+ h+='</tbody>';document.getElementById('moverTable').innerHTML=h;}
+renderMovers();
+
+// Lane chart + table
+const lanes=DATA.lanes.slice().sort((a,b)=>b.var_pl-a.var_pl);
+new Chart(document.getElementById('lanechart'),{type:'bar',data:{labels:lanes.map(l=>l.lane),
+ datasets:[{data:lanes.map(l=>l.var_pl*1000/1e6),backgroundColor:lanes.map(l=>l.var_pl>=0?css('--pos'):css('--neg')),borderRadius:2}]},
+ options:{maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},title:{display:true,text:'Lane P&L variance, Projection minus Budget (US$M)',color:css('--mut')},tooltip:{callbacks:{label:c=>lanes[c.dataIndex].group+': $'+c.raw.toFixed(1)+'M'}}},
+  scales:{x:{ticks:{color:css('--mut'),callback:v=>'$'+v+'M'},grid:{color:css('--line')}},y:{ticks:{color:css('--ink'),font:{size:10},autoSkip:false},grid:{display:false}}}}});
+
+let sortKey='var_pl',sortDir=-1;
+const grpsel=document.getElementById('grpfilter');
+grpsel.innerHTML='<option value="">All trade groups</option>'+DATA.groups.map(g=>'<option>'+g+'</option>').join('');
+function renderLaneTable(){const q=document.getElementById('search').value.toLowerCase();const gf=grpsel.value;
+ let rows=DATA.lanes.filter(l=>l.lane.toLowerCase().includes(q)&&(!gf||l.group===gf));
+ rows.sort((a,b)=>{const av=a[sortKey],bv=b[sortKey];if(typeof av==='string')return sortDir*av.localeCompare(bv);return sortDir*(av-bv);});
+ let h='<thead><tr><th class="sortable" onclick="setSort(\'lane\')">Lane</th><th class="sortable" onclick="setSort(\'group\')" style="text-align:left">Trade</th><th class="sortable" onclick="setSort(\'init_pl\')">Budget P&L</th><th class="sortable" onclick="setSort(\'rev_pl\')">Proj P&L</th><th class="sortable" onclick="setSort(\'var_pl\')">Variance</th></tr></thead><tbody>';
+ rows.forEach(l=>{const isnew=Math.abs(l.init_pl)<0.05;const dv=l.var_pl*1000;
+   h+='<tr><td>'+l.lane+(isnew&&l.rev_pl!==0?'<span class="new">NEW</span>':'')+'</td><td style="text-align:left">'+l.group+'</td><td>$'+k(l.init_pl/1000)+'M</td><td>$'+k(l.rev_pl/1000)+'M</td><td class="'+(dv>=0?'pos':'neg')+'">'+sign(dv)+'$'+fmtM(dv)+'M</td></tr>';});
+ h+='</tbody>';document.getElementById('lanetable').innerHTML=h;}
+function setSort(key){if(sortKey===key)sortDir*=-1;else{sortKey=key;sortDir=(key==='lane'||key==='group')?1:-1;}renderLaneTable();}
+renderLaneTable();
+
+// ===== Budget vs Q1 cost per TEU =====
+const CQ={"groups":["TWN","Short-Haul (SH)","LH-Red Sea","LH-India & ME","East Africa","West Asia (SH2)","AEM","SH3"],"lanes":[{"lane":"AM1","group":"AEM","b_cost":119216222,"b_coc":65461,"b_teu":102145,"a_cost":9145474,"a_coc":5136,"a_teu":5203},{"lane":"BDX","group":"Short-Haul (SH)","b_cost":3475973,"b_coc":9120,"b_teu":9120,"a_cost":600378,"a_coc":1690,"a_teu":1692},{"lane":"CCT","group":"Short-Haul (SH)","b_cost":13880630,"b_coc":29470,"b_teu":29470,"a_cost":3783455,"a_coc":7867,"a_teu":7933},{"lane":"CH1","group":"Short-Haul (SH)","b_cost":3311538,"b_coc":6691,"b_teu":6691,"a_cost":655833,"a_coc":1556,"a_teu":1556},{"lane":"CI3","group":"LH-India & ME","b_cost":20929496,"b_coc":12390,"b_teu":12390,"a_cost":5264450,"a_coc":2575,"a_teu":2661},{"lane":"CP8","group":"Short-Haul (SH)","b_cost":3999940,"b_coc":5980,"b_teu":5980,"a_cost":819963,"a_coc":1086,"a_teu":1086},{"lane":"CST","group":"Short-Haul (SH)","b_cost":18696978,"b_coc":41124,"b_teu":47774,"a_cost":2191902,"a_coc":3948,"a_teu":4105},{"lane":"CSX","group":"LH-India & ME","b_cost":5991533,"b_coc":3600,"b_teu":3600,"a_cost":1364230,"a_coc":749,"a_teu":749},{"lane":"CWS","group":"LH-India & ME","b_cost":10494861,"b_coc":5616,"b_teu":5616,"a_cost":3070862,"a_coc":1412,"a_teu":1421},{"lane":"HDT","group":"TWN","b_cost":13991207,"b_coc":11520,"b_teu":79520,"a_cost":2905398,"a_coc":2008,"a_teu":2257},{"lane":"IMR","group":"West Asia (SH2)","b_cost":37422168,"b_coc":48903,"b_teu":62368,"a_cost":9092052,"a_coc":3446,"a_teu":7915},{"lane":"IQH","group":"Short-Haul (SH)","b_cost":2028655,"b_coc":4940,"b_teu":4940,"a_cost":471031,"a_coc":1025,"a_teu":1025},{"lane":"JCT","group":"Short-Haul (SH)","b_cost":4945822,"b_coc":14614,"b_teu":14614,"a_cost":1055270,"a_coc":2038,"a_teu":2038},{"lane":"JFX","group":"LH-India & ME","b_cost":28367897,"b_coc":14964,"b_teu":14964,"a_cost":4407122,"a_coc":2250,"a_teu":2417},{"lane":"JPS","group":"West Asia (SH2)","b_cost":4329402,"b_coc":19188,"b_teu":26439,"a_cost":1427248,"a_coc":325,"a_teu":1603},{"lane":"KHX","group":"Short-Haul (SH)","b_cost":1320507,"b_coc":3845,"b_teu":3845,"a_cost":287085,"a_coc":694,"a_teu":694},{"lane":"LHT","group":"LH-India & ME","b_cost":0,"b_coc":0,"b_teu":0,"a_cost":302202,"a_coc":302,"a_teu":302},{"lane":"MES","group":"SH3","b_cost":0,"b_coc":0,"b_teu":0,"a_cost":13650,"a_coc":0,"a_teu":0},{"lane":"MFX","group":"East Africa","b_cost":3635077,"b_coc":2500,"b_teu":2500,"a_cost":672850,"a_coc":502,"a_teu":504},{"lane":"MGA","group":"LH-India & ME","b_cost":7786434,"b_coc":3927,"b_teu":3927,"a_cost":1331496,"a_coc":411,"a_teu":423},{"lane":"NP2","group":"Short-Haul (SH)","b_cost":18332618,"b_coc":20700,"b_teu":20700,"a_cost":2692150,"a_coc":2809,"a_teu":3816},{"lane":"NSX","group":"Short-Haul (SH)","b_cost":24404451,"b_coc":60550,"b_teu":60550,"a_cost":4043539,"a_coc":9241,"a_teu":9271},{"lane":"NTE","group":"AEM","b_cost":2539011,"b_coc":5000,"b_teu":5000,"a_cost":0,"a_coc":0,"a_teu":0},{"lane":"RCS","group":"LH-Red Sea","b_cost":72841549,"b_coc":41672,"b_teu":45772,"a_cost":0,"a_coc":0,"a_teu":0},{"lane":"REX","group":"LH-Red Sea","b_cost":80951615,"b_coc":45319,"b_teu":45819,"a_cost":28343565,"a_coc":17837,"a_teu":17888},{"lane":"SGS","group":"LH-India & ME","b_cost":10918038,"b_coc":13676,"b_teu":13676,"a_cost":1714329,"a_coc":1940,"a_teu":1942},{"lane":"SGX","group":"LH-India & ME","b_cost":0,"b_coc":0,"b_teu":0,"a_cost":2128465,"a_coc":1396,"a_teu":2867},{"lane":"SJA","group":"West Asia (SH2)","b_cost":17695589,"b_coc":32001,"b_teu":40518,"a_cost":1812093,"a_coc":840,"a_teu":1769},{"lane":"SL1","group":"Short-Haul (SH)","b_cost":0,"b_coc":0,"b_teu":0,"a_cost":305137,"a_coc":424,"a_teu":424},{"lane":"ST1","group":"TWN","b_cost":14693347,"b_coc":40519,"b_teu":40519,"a_cost":3672077,"a_coc":8411,"a_teu":8737},{"lane":"ST3","group":"TWN","b_cost":16211104,"b_coc":39831,"b_teu":44103,"a_cost":3846309,"a_coc":7341,"a_teu":8712},{"lane":"SVP","group":"Short-Haul (SH)","b_cost":2732308,"b_coc":4339,"b_teu":4339,"a_cost":635563,"a_coc":976,"a_teu":982},{"lane":"TH3","group":"TWN","b_cost":1245507,"b_coc":2700,"b_teu":2700,"a_cost":236659,"a_coc":505,"a_teu":505},{"lane":"WAT","group":"West Asia (SH2)","b_cost":0,"b_coc":0,"b_teu":0,"a_cost":70827,"a_coc":16,"a_teu":67}]};
+const cpt=(c,v)=>v?c/v:null;
+function renderCost(){
+ const basis=document.getElementById('basisSel').value;
+ const vb=basis==='coc'?'b_coc':'b_teu', va=basis==='coc'?'a_coc':'a_teu';
+ const G={};CQ.groups.forEach(g=>G[g]={bc:0,bv:0,ac:0,av:0});
+ CQ.lanes.forEach(l=>{const g=G[l.group];if(!g)return;g.bc+=l.b_cost;g.bv+=l[vb];g.ac+=l.a_cost;g.av+=l[va];});
+ let th='<thead><tr><th>Trade</th><th>Budget $/TEU</th><th>Q1 Actual $/TEU</th><th>&Delta;</th><th>&Delta;%</th></tr></thead><tbody>';
+ let tb=0,tbv=0,ta=0,tav=0;
+ CQ.groups.forEach(g=>{const d=G[g];const b=cpt(d.bc,d.bv),a=cpt(d.ac,d.av);tb+=d.bc;tbv+=d.bv;ta+=d.ac;tav+=d.av;
+   const dv=(b!=null&&a!=null)?a-b:null;const cls=dv!=null?(dv<=0?'pos':'neg'):'';
+   th+='<tr><td>'+g+'</td><td>'+(b!=null?'$'+fmt0(b):'&mdash;')+'</td><td>'+(a!=null?'$'+fmt0(a):'&mdash;')+'</td>'+
+     '<td class="'+cls+'">'+(dv!=null?(dv>0?'+':'')+'$'+fmt0(dv):'&mdash;')+'</td>'+
+     '<td class="'+cls+'">'+(dv!=null&&b?(dv>0?'+':'')+(dv/b*100).toFixed(0)+'%':'&mdash;')+'</td></tr>';});
+ const TB=cpt(tb,tbv),TA=cpt(ta,tav),TD=TA-TB;const tcls=TD<=0?'pos':'neg';
+ th+='<tr class="tot"><td>Total</td><td>$'+fmt0(TB)+'</td><td>$'+fmt0(TA)+'</td><td class="'+tcls+'">'+(TD>0?'+':'')+'$'+fmt0(TD)+'</td><td class="'+tcls+'">'+(TD>0?'+':'')+(TD/TB*100).toFixed(0)+'%</td></tr></tbody>';
+ document.getElementById('cqGroup').innerHTML=th;
+ const bdata=CQ.groups.map(g=>cpt(G[g].bc,G[g].bv)),adata=CQ.groups.map(g=>cpt(G[g].ac,G[g].av));
+ if(window._cq)window._cq.destroy();
+ window._cq=new Chart(document.getElementById('cqchart'),{type:'bar',data:{labels:CQ.groups,datasets:[
+   {label:'Full-year Budget',data:bdata,backgroundColor:'#c4d3e8',borderRadius:3},
+   {label:'Q1 Actual',data:adata,backgroundColor:css('--accent'),borderRadius:3}]},
+   options:{maintainAspectRatio:false,plugins:{legend:{labels:{color:css('--ink')}},title:{display:true,text:'Cost per '+(basis==='coc'?'laden COC-TEU':'TEU')+' (US$)',color:css('--mut')},tooltip:{callbacks:{label:c=>c.dataset.label+': '+(c.raw!=null?'$'+fmt0(c.raw):'n/a')}}},
+    scales:{x:{ticks:{color:css('--mut'),maxRotation:40,minRotation:40},grid:{display:false}},y:{ticks:{color:css('--mut'),callback:v=>'$'+v},grid:{color:css('--line')}}}}});
+ const q=document.getElementById('cqsearch').value.toLowerCase();
+ let rows=CQ.lanes.filter(l=>l.lane.toLowerCase().includes(q)).map(l=>({lane:l.lane,group:l.group,b:cpt(l.b_cost,l[vb]),a:cpt(l.a_cost,l[va])}));
+ rows.sort((x,y)=>{const dx=(x.b!=null&&x.a!=null)?x.a-x.b:-1e15,dy=(y.b!=null&&y.a!=null)?y.a-y.b:-1e15;return dy-dx;});
+ let h='<thead><tr><th>Lane</th><th>Trade</th><th>Budget $/TEU</th><th>Q1 $/TEU</th><th>&Delta;</th></tr></thead><tbody>';
+ rows.forEach(l=>{const dv=(l.b!=null&&l.a!=null)?l.a-l.b:null;const cls=dv!=null?(dv<=0?'pos':'neg'):'';
+   h+='<tr><td>'+l.lane+'</td><td style="text-align:left">'+l.group+'</td>'+
+     '<td>'+(l.b!=null?'$'+fmt0(l.b):'<span class="new">N/A</span>')+'</td>'+
+     '<td>'+(l.a!=null?'$'+fmt0(l.a):'<span class="new">N/A</span>')+'</td>'+
+     '<td class="'+cls+'">'+(dv!=null?(dv>0?'+':'')+'$'+fmt0(dv):'&mdash;')+'</td></tr>';});
+ h+='</tbody>';document.getElementById('cqService').innerHTML=h;
+ const story='<b>What Q1 unit costs say vs budget (laden-COC lens).</b><ul>'+
+  '<li><b>Long-haul running close to or below plan.</b> LH-Red Sea Q1 cost/TEU is <b>below</b> budget and LH-India &amp; ME is roughly in line &mdash; the long-haul cost assumptions are holding so far.</li>'+
+  '<li><b>Short-haul modestly above plan</b> on a per-box basis (CST, JCT, CP8 running hot), consistent with its P&amp;L slipping into a per-box loss in the full-year reforecast.</li>'+
+  '<li><b>TWN and AEM read higher in Q1</b> mainly because their large SOC fixed-slot volume is under-captured in the Q1 voyage file, shrinking the denominator &mdash; not a genuine unit-cost blowout.</li>'+
+  '<li><b>West Asia is not reliable here</b> (thin Q1 voyage capture); exclude IMR/JPS/SJA from conclusions.</li></ul>';
+ document.getElementById('cqStory').innerHTML=story;
+}
+renderCost();
+
+// ===== Trade-group pages + persistent comments =====
+const dispN={"TWN":"TWN","SH":"Short-Haul (SH)","LH-Red Sea":"LH-Red Sea","LH-India & Middle East":"LH-India & ME","East Africa":"East Africa","SH2":"West Asia (SH2)","AEM":"AEM","SH3":"SH3"};
+const DETAIL={"TWN":{"lanes":[{"n":"ST1","voy":47,"bsa":20880,"coc":37716.0,"soc":326.0,"rev":24726.0,"fix":6027.3,"var":9187.4,"rpl":9511.3,"ipl":9400.7,"prem":697.8,"b_coc":40518.8,"b_soc":0.0,"b_rev":24094.0,"b_fix":4919.6,"b_var":9773.7},{"n":"ST3","voy":43,"bsa":23100,"coc":36278.0,"soc":8479.0,"rev":25945.2,"fix":8052.4,"var":9456.0,"rpl":8436.8,"ipl":5022.1,"prem":690.6,"b_coc":39830.8,"b_soc":4271.8,"b_rev":21233.2,"b_fix":7520.5,"b_var":8690.6},{"n":"HDT","voy":38,"bsa":8640,"coc":11398.3,"soc":62949.0,"rev":21831.4,"fix":11426.9,"var":3404.6,"rpl":6999.9,"ipl":3901.1,"prem":1339.2,"b_coc":11520.1,"b_soc":67999.9,"b_rev":17892.3,"b_fix":10315.4,"b_var":3675.8},{"n":"TH3","voy":46,"bsa":1020,"coc":2545.0,"soc":0.0,"rev":1238.5,"fix":433.9,"var":701.1,"rpl":103.4,"ipl":105.5,"prem":0.0,"b_coc":2700.0,"b_soc":0.0,"b_rev":1351.0,"b_fix":404.8,"b_var":840.7}],"ib":{"voy":178,"bsa":68030,"coc":88692.8,"soc":72271.6}},"SH":{"lanes":[{"n":"NP2","voy":33,"bsa":13195,"coc":13209.0,"soc":1007.0,"rev":13781.2,"fix":7763.4,"var":6114.8,"rpl":-97.0,"ipl":898.4,"prem":946.7,"b_coc":20700.0,"b_soc":0.0,"b_rev":19231.0,"b_fix":9365.4,"b_var":8967.2},{"n":"BDX","voy":48,"bsa":4900,"coc":7721.0,"soc":2.0,"rev":2631.0,"fix":1203.7,"var":1371.6,"rpl":55.7,"ipl":-724.4,"prem":0.0,"b_coc":9120.0,"b_soc":0.0,"b_rev":2751.6,"b_fix":2077.2,"b_var":1398.8},{"n":"CCT","voy":51,"bsa":22105,"coc":39123.5,"soc":66.0,"rev":20718.8,"fix":11659.1,"var":7482.2,"rpl":1577.6,"ipl":615.2,"prem":1463.4,"b_coc":29469.8,"b_soc":0.0,"b_rev":14495.8,"b_fix":7980.5,"b_var":5900.1},{"n":"CH1","voy":50,"bsa":3914,"coc":6644.0,"soc":0.0,"rev":2573.9,"fix":1748.8,"var":1277.9,"rpl":-452.8,"ipl":-667.3,"prem":0.0,"b_coc":6691.2,"b_soc":0.0,"b_rev":2644.3,"b_fix":2090.7,"b_var":1220.8},{"n":"NSX","voy":47,"bsa":19375,"coc":31542.9,"soc":5070.0,"rev":14864.9,"fix":10255.5,"var":5573.9,"rpl":-964.5,"ipl":256.4,"prem":1414.4,"b_coc":60550.0,"b_soc":0.0,"b_rev":24660.8,"b_fix":11735.2,"b_var":12669.3},{"n":"CP8","voy":47,"bsa":4760,"coc":5646.0,"soc":0.0,"rev":4820.3,"fix":1502.1,"var":2386.5,"rpl":931.7,"ipl":404.2,"prem":0.0,"b_coc":5980.0,"b_soc":0.0,"b_rev":4404.1,"b_fix":1609.8,"b_var":2390.1},{"n":"CST","voy":38,"bsa":33130,"coc":50366.8,"soc":157.0,"rev":22607.9,"fix":17971.4,"var":9178.0,"rpl":-4541.6,"ipl":695.6,"prem":2742.0,"b_coc":41124.3,"b_soc":6650.0,"b_rev":19392.6,"b_fix":11419.3,"b_var":7277.7},{"n":"IQH","voy":51,"bsa":2040,"coc":4445.0,"soc":0.0,"rev":2090.4,"fix":1012.4,"var":945.0,"rpl":133.1,"ipl":220.4,"prem":0.0,"b_coc":4940.0,"b_soc":0.0,"b_rev":2249.1,"b_fix":990.5,"b_var":1038.1},{"n":"JCT","voy":47,"bsa":4650,"coc":9088.6,"soc":0.0,"rev":5256.5,"fix":2975.7,"var":1843.4,"rpl":437.4,"ipl":410.2,"prem":0.0,"b_coc":14613.5,"b_soc":0.0,"b_rev":5356.0,"b_fix":3007.7,"b_var":1938.1},{"n":"KHX","voy":48,"bsa":1440,"coc":3577.6,"soc":0.0,"rev":1480.8,"fix":640.2,"var":724.1,"rpl":116.5,"ipl":172.4,"prem":0.0,"b_coc":3844.8,"b_soc":0.0,"b_rev":1492.9,"b_fix":648.0,"b_var":672.5},{"n":"SL1","voy":0,"bsa":0,"coc":424.0,"soc":0.0,"rev":80.0,"fix":251.0,"var":54.1,"rpl":-225.2,"ipl":0.0,"prem":0.0,"b_coc":null,"b_soc":null,"b_rev":null,"b_fix":null,"b_var":null},{"n":"SVP","voy":36,"bsa":3642,"coc":4764.4,"soc":6.0,"rev":3563.4,"fix":1223.5,"var":1691.6,"rpl":648.3,"ipl":336.0,"prem":0.0,"b_coc":4339.2,"b_soc":0.0,"b_rev":3068.3,"b_fix":1175.0,"b_var":1557.3}],"ib":{"voy":511,"bsa":128230,"coc":196353.8,"soc":6650.0}},"LH-Red Sea":{"lanes":[{"n":"REX","voy":52,"bsa":80595,"coc":95649.8,"soc":51.0,"rev":239721.9,"fix":121790.5,"var":57724.6,"rpl":60206.8,"ipl":9620.5,"prem":16090.5,"b_coc":45318.5,"b_soc":500.0,"b_rev":90572.1,"b_fix":60093.6,"b_var":20858.0},{"n":"RES","voy":29,"bsa":8974,"coc":11300.8,"soc":0.0,"rev":27022.7,"fix":13058.7,"var":3973.3,"rpl":9990.7,"ipl":0.0,"prem":2077.0,"b_coc":null,"b_soc":null,"b_rev":null,"b_fix":null,"b_var":null},{"n":"RCS","voy":0,"bsa":0,"coc":0.0,"soc":0.0,"rev":0.0,"fix":0.0,"var":0.0,"rpl":0.0,"ipl":13035.9,"prem":0.0,"b_coc":41672.1,"b_soc":4100.0,"b_rev":85877.5,"b_fix":50296.8,"b_var":22544.7}],"ib":{"voy":72,"bsa":68363,"coc":86990.6,"soc":4600.0}},"LH-India & Middle East":{"lanes":[{"n":"JFX","voy":8,"bsa":2400,"coc":2250.0,"soc":167.0,"rev":4165.2,"fix":1925.8,"var":2481.3,"rpl":-241.9,"ipl":-551.5,"prem":0.0,"b_coc":14964.0,"b_soc":0.0,"b_rev":27816.4,"b_fix":11074.8,"b_var":17293.1},{"n":"MGA","voy":6,"bsa":423,"coc":411.0,"soc":12.0,"rev":1433.6,"fix":778.8,"var":552.7,"rpl":102.1,"ipl":359.5,"prem":0.0,"b_coc":3927.0,"b_soc":0.0,"b_rev":8145.9,"b_fix":2415.1,"b_var":5371.3},{"n":"SGS","voy":12,"bsa":1200,"coc":2811.0,"soc":2.0,"rev":2781.3,"fix":1044.8,"var":1430.5,"rpl":306.0,"ipl":-240.7,"prem":0.0,"b_coc":13676.0,"b_soc":0.0,"b_rev":10677.4,"b_fix":4076.0,"b_var":6842.0},{"n":"CGS","voy":11,"bsa":6280,"coc":6411.9,"soc":0.0,"rev":22222.0,"fix":11363.6,"var":12755.1,"rpl":-1896.7,"ipl":0.0,"prem":1189.0,"b_coc":null,"b_soc":null,"b_rev":null,"b_fix":null,"b_var":null},{"n":"CGX","voy":17,"bsa":95000,"coc":99462.5,"soc":0.0,"rev":319671.5,"fix":72963.0,"var":188476.3,"rpl":58232.2,"ipl":0.0,"prem":11239.9,"b_coc":null,"b_soc":null,"b_rev":null,"b_fix":null,"b_var":null},{"n":"LHT","voy":3,"bsa":0,"coc":302.0,"soc":0.0,"rev":590.6,"fix":176.6,"var":125.6,"rpl":288.4,"ipl":0.0,"prem":0.0,"b_coc":null,"b_soc":null,"b_rev":null,"b_fix":null,"b_var":null},{"n":"SGX","voy":7,"bsa":8000,"coc":1396.0,"soc":1471.0,"rev":4973.1,"fix":4572.0,"var":771.0,"rpl":-369.9,"ipl":0.0,"prem":358.3,"b_coc":null,"b_soc":null,"b_rev":null,"b_fix":null,"b_var":null},{"n":"CI3","voy":21,"bsa":4200,"coc":4575.0,"soc":86.0,"rev":7291.3,"fix":4088.2,"var":4189.3,"rpl":-986.1,"ipl":-4145.6,"prem":0.0,"b_coc":12390.0,"b_soc":0.0,"b_rev":16783.9,"b_fix":8261.4,"b_var":12668.1},{"n":"CSX","voy":18,"bsa":850,"coc":1399.0,"soc":0.0,"rev":2111.1,"fix":686.4,"var":1408.6,"rpl":16.0,"ipl":-1136.4,"prem":0.0,"b_coc":3600.0,"b_soc":0.0,"b_rev":4855.1,"b_fix":2052.0,"b_var":3939.5},{"n":"CWS","voy":17,"bsa":2040,"coc":2306.0,"soc":9.0,"rev":4533.1,"fix":1655.0,"var":3242.6,"rpl":-364.4,"ipl":-1845.5,"prem":0.0,"b_coc":5616.0,"b_soc":0.0,"b_rev":8649.4,"b_fix":4128.0,"b_var":6366.9},{"n":"HLX","voy":33,"bsa":25000,"coc":29734.6,"soc":0.0,"rev":36145.9,"fix":16128.9,"var":8430.8,"rpl":11586.3,"ipl":0.0,"prem":1777.2,"b_coc":null,"b_soc":null,"b_rev":null,"b_fix":null,"b_var":null},{"n":"SIS","voy":16,"bsa":16465,"coc":17930.2,"soc":0.0,"rev":27380.6,"fix":9111.7,"var":5729.0,"rpl":12539.9,"ipl":0.0,"prem":1657.2,"b_coc":null,"b_soc":null,"b_rev":null,"b_fix":null,"b_var":null}],"ib":{"voy":244,"bsa":43507,"coc":54173.0,"soc":0.0}},"East Africa":{"lanes":[{"n":"MFX","voy":48,"bsa":2400,"coc":2402.0,"soc":2.0,"rev":4713.0,"fix":2178.0,"var":850.0,"rpl":1685.0,"ipl":1581.2,"prem":0.0,"b_coc":2500.0,"b_soc":0.0,"b_rev":5216.2,"b_fix":2259.0,"b_var":1376.1}],"ib":{"voy":101,"bsa":0,"coc":2500.0,"soc":0.0}},"SH2":{"lanes":[{"n":"IMR","voy":48,"bsa":21496,"coc":17061.2,"soc":13704.6,"rev":29634.2,"fix":16719.2,"var":10049.4,"rpl":2865.6,"ipl":-3598.2,"prem":1460.4,"b_coc":48902.5,"b_soc":13465.6,"b_rev":33824.0,"b_fix":28054.0,"b_var":9368.2},{"n":"JPS","voy":52,"bsa":21060,"coc":1857.2,"soc":3177.2,"rev":7182.7,"fix":4331.6,"var":1295.1,"rpl":1556.0,"ipl":1448.8,"prem":348.5,"b_coc":19187.7,"b_soc":7250.9,"b_rev":5778.2,"b_fix":4120.1,"b_var":209.3},{"n":"SJA","voy":31,"bsa":22000,"coc":12648.6,"soc":6290.2,"rev":20613.1,"fix":14162.0,"var":4318.2,"rpl":2132.8,"ipl":-1590.3,"prem":2259.4,"b_coc":32000.8,"b_soc":8516.7,"b_rev":16105.3,"b_fix":12905.0,"b_var":4790.6},{"n":"WAT","voy":2,"bsa":0,"coc":16.0,"soc":51.0,"rev":36.1,"fix":63.6,"var":7.2,"rpl":-34.8,"ipl":0.0,"prem":0.0,"b_coc":null,"b_soc":null,"b_rev":null,"b_fix":null,"b_var":null},{"n":"GTS","voy":1,"bsa":1200,"coc":285.6,"soc":1077.6,"rev":1693.3,"fix":994.3,"var":169.1,"rpl":529.9,"ipl":0.0,"prem":167.1,"b_coc":null,"b_soc":null,"b_rev":null,"b_fix":null,"b_var":null},{"n":"RTS","voy":30,"bsa":36000,"coc":12458.4,"soc":15952.8,"rev":31408.8,"fix":19917.0,"var":5570.6,"rpl":5921.2,"ipl":0.0,"prem":3138.8,"b_coc":null,"b_soc":null,"b_rev":null,"b_fix":null,"b_var":null}],"ib":{"voy":135,"bsa":74840,"coc":36769.2,"soc":29233.2}},"AEM":{"lanes":[{"n":"AM1","voy":30,"bsa":55828,"coc":74621.5,"soc":16602.0,"rev":164624.2,"fix":104167.5,"var":50655.5,"rpl":9801.3,"ipl":14479.2,"prem":12540.9,"b_coc":65461.5,"b_soc":36683.0,"b_rev":133695.4,"b_fix":88178.9,"b_var":31037.3},{"n":"NTE","voy":0,"bsa":0,"coc":0.0,"soc":0.0,"rev":0.0,"fix":0.0,"var":0.0,"rpl":0.0,"ipl":-330.2,"prem":0.0,"b_coc":5000.0,"b_soc":0.0,"b_rev":2208.8,"b_fix":2539.0,"b_var":0.0},{"n":"ECCL","voy":0,"bsa":0,"coc":0.0,"soc":0.0,"rev":0.0,"fix":0.0,"var":0.0,"rpl":0.0,"ipl":0.0,"prem":0.0,"b_coc":null,"b_soc":null,"b_rev":null,"b_fix":null,"b_var":null}],"ib":{"voy":77,"bsa":58116,"coc":65461.5,"soc":36683.0}},"SH3":{"lanes":[{"n":"MES","voy":16,"bsa":9410,"coc":2713.6,"soc":1035.1,"rev":4403.3,"fix":8285.9,"var":460.9,"rpl":-4343.5,"ipl":0.0,"prem":2204.6,"b_coc":null,"b_soc":null,"b_rev":null,"b_fix":null,"b_var":null},{"n":"NAF","voy":12,"bsa":3756,"coc":213.4,"soc":381.9,"rev":5866.7,"fix":5104.7,"var":18.2,"rpl":743.7,"ipl":0.0,"prem":1065.6,"b_coc":null,"b_soc":null,"b_rev":null,"b_fix":null,"b_var":null}],"ib":{"voy":0,"bsa":0,"coc":0.0,"soc":0.0}}};
+const mny=v=>{const r=Math.round(v);return r<0?'<span class="neg">('+fmt0(-r)+')</span>':fmt0(r);};
+const dol=v=>{if(v==null||!isFinite(v))return '&mdash;';const r=Math.round(v);return r<0?'<span class="neg">($'+fmt0(-r)+')</span>':'$'+fmt0(r);};
+
+function buildDetail(g){
+ const d=DETAIL[g],t=DATA.tgpt[g],name=dispN[g],L=d.lanes,ib=d.ib;
+ const S=k=>L.reduce((s,l)=>s+(l[k]||0),0);
+ const ttl={voy:S('voy'),bsa:S('bsa'),coc:S('coc'),soc:S('soc'),rev:S('rev'),fix:S('fix'),'var':S('var'),rpl:S('rpl'),ipl:S('ipl'),prem:S('prem')};
+ let h='<div class="ptitle">2026 Projection &ndash; '+name+'</div>';
+ h+='<div class="card" style="overflow-x:auto"><table class="detail"><thead><tr><th>Items</th>';
+ L.forEach(l=>h+='<th>'+l.n+'</th>');
+ h+='<th>2026 TTL</th><th>2026 Initial Budget</th><th>Variance</th></tr></thead><tbody>';
+ function top(lab,k){let r='<tr><td>'+lab+'</td>';L.forEach(l=>r+='<td>'+mny(l[k])+'</td>');r+='<td>'+mny(ttl[k])+'</td><td>'+mny(ib[k])+'</td><td>'+mny(ttl[k]-ib[k])+'</td></tr>';return r;}
+ h+=top('No. of Round Voyage','voy')+top('BSA','bsa')+top('COC-TEU','coc')+top('SOC-TEU','soc');
+ function mid(lab,k,cls){let r='<tr class="'+(cls||'')+'"><td>'+lab+'</td>';L.forEach(l=>r+='<td>'+mny(l[k])+'</td>');r+='<td>'+mny(ttl[k])+'</td><td class="greycell"></td><td class="greycell"></td></tr>';return r;}
+ h+=mid("Total Revenue (US$'K)",'rev')+mid("Total Fixed Cost (US$'K)",'fix')+mid("Total Variable Cost (US$'K)",'var');
+ h+=mid("2026 Revised Budget P&L (US$'K)",'rpl','plrow')+mid("2026 Initial Budget P&L (US$'K)",'ipl','plrow');
+ let vr='<tr class="plrow"><td>Variance (US$\'K)</td>';L.forEach(l=>vr+='<td>'+mny(l.rpl-l.ipl)+'</td>');vr+='<td>'+mny(ttl.rpl-ttl.ipl)+'</td><td class="greycell"></td><td class="greycell"></td></tr>';
+ h+=vr+'</tbody></table></div>';
+ // group per-TEU vs budget
+ h+='<h3 class="dsub">Per-TEU &mdash; group vs Initial Budget</h3><div class="card" style="overflow-x:auto"><table class="detail"><thead><tr><th>Per-TEU (US$)</th><th>Initial Budget</th><th>3+9 Projection</th><th>&Delta;</th></tr></thead><tbody>';
+ function pr(lab,b,p,lower){const dv=p-b;const cls=(lower?dv<=0:dv>=0)?'pos':'neg';return '<tr><td>'+lab+'</td><td>$'+fmt0(b)+'</td><td>$'+fmt0(p)+'</td><td class="'+cls+'">'+(dv>=0?'+':'')+'$'+fmt0(dv)+'</td></tr>';}
+ h+=pr('Revenue / TEU',t.i_revT,t.r_revT,false)+pr('Variable cost / TEU',t.i_vcT,t.r_vcT,true)+pr('Fixed cost / TEU',t.i_fcT,t.r_fcT,true);
+ h+='<tr><td>Fixed cost / TEU (bunker @ orig)</td><td>&mdash;</td><td>$'+fmt0(t.r_fcT_adj)+'</td><td class="pos">&minus;$'+fmt0(t.r_fcT-t.r_fcT_adj)+'</td></tr>';
+ h+=pr('Gross profit / TEU',t.i_gpT,t.r_gpT,false);
+ h+='<tr class="plrow"><td>Volume (TEU)</td><td>'+fmt0(t.i_teu)+'</td><td>'+fmt0(t.r_teu)+'</td><td>'+mny(t.r_teu-t.i_teu)+'</td></tr></tbody></table></div>';
+ // per-service per-TEU: projection vs budget
+ h+='<h3 class="dsub">Per-service per-TEU &mdash; projection vs Initial Budget</h3><div class="card" style="overflow-x:auto"><table class="detail"><thead>';
+ h+='<tr><th rowspan="2">Service</th><th colspan="2">TEU</th><th colspan="2">P&L (US$\'K)</th><th colspan="2">Rev / TEU</th><th colspan="2">VC / TEU</th><th colspan="3">Fixed cost / TEU</th><th colspan="2">GP / TEU</th></tr>';
+ h+='<tr><th>Budget</th><th>Proj</th><th>Budget</th><th>Proj</th><th>Budget</th><th>Proj</th><th>Budget</th><th>Proj</th><th>Budget</th><th>Proj</th><th>Proj (bnk&rarr;orig)</th><th>Budget</th><th>Proj</th></tr></thead><tbody>';
+ const muted='<span style="color:var(--mut)">&mdash;</span>';
+ function prow(o,cls){
+   const hasB=o.bteu>0;
+   const P=v=>o.teu?dol(v*1000/o.teu):muted;
+   const Bd=v=>hasB?dol(v*1000/o.bteu):muted;
+   const fcAdj=o.teu?dol((o.fix-o.prem)*1000/o.teu):muted;
+   const gpB=hasB?dol((o.brev-o.bfix-o.bvar)*1000/o.bteu):muted;
+   return '<tr class="'+(cls||'')+'"><td>'+o.nm+(o.budOnly?' <span class="new">BUD-ONLY</span>':(!o.hasBdef&&o.teu?' <span class="new">NEW</span>':''))+'</td>'+
+     '<td>'+(hasB?fmt0(o.bteu):muted)+'</td><td>'+(o.teu?fmt0(o.teu):muted)+'</td>'+
+     '<td>'+mny(o.ipl)+'</td><td>'+mny(o.gp)+'</td>'+
+     '<td>'+Bd(o.brev)+'</td><td>'+P(o.rev)+'</td>'+
+     '<td>'+Bd(o.bvar)+'</td><td>'+P(o['var'])+'</td>'+
+     '<td>'+Bd(o.bfix)+'</td><td>'+P(o.fix)+'</td><td class="pos">'+fcAdj+'</td>'+
+     '<td>'+gpB+'</td><td>'+P(o.gp)+'</td></tr>';
+ }
+ let bt={teu:0,rev:0,fix:0,var:0};
+ L.forEach(l=>{const hasBdef=l.b_coc!=null;const bteu=hasBdef?(l.b_coc+l.b_soc):0;
+   if(hasBdef){bt.teu+=bteu;bt.rev+=l.b_rev;bt.fix+=l.b_fix;bt.var+=l.b_var;}
+   h+=prow({nm:l.n,teu:l.coc+l.soc,rev:l.rev,fix:l.fix,'var':l['var'],prem:l.prem,gp:l.rpl,ipl:l.ipl,
+     hasBdef:hasBdef,budOnly:(hasBdef&&(l.coc+l.soc)===0),bteu:bteu,brev:l.b_rev,bfix:l.b_fix,bvar:l.b_var},'');});
+ h+=prow({nm:name+' total',teu:ttl.coc+ttl.soc,rev:ttl.rev,fix:ttl.fix,'var':ttl['var'],prem:ttl.prem,gp:ttl.rpl,ipl:ttl.ipl,
+   hasBdef:true,budOnly:false,bteu:bt.teu,brev:bt.rev,bfix:bt.fix,bvar:bt.var},'plrow');
+ h+='</tbody></table><div class="notes" style="margin-top:8px">Budget shown only for services in the original budget. <span class="new">NEW</span> = new service (no budget); <span class="new">BUD-ONLY</span> = budgeted but not run in the projection. "Proj (bnk&rarr;orig)" re-prices projection bunker to original rates. Budget per-TEU uses initial-budget detail (gross volume incl. fixed-slot SOC), so high-SOC services (e.g. HDT) show low budget cost/TEU.</div></div>';
+ // comments for this group
+ h+='<h3 class="dsub">Comments &amp; analysis &mdash; '+name+'</h3><div class="card"><textarea class="note dnote" data-k="'+g+'" rows="6" placeholder="Paste commentary and analysis for '+name+'&hellip;"></textarea><div class="notesbar"><span></span><span id="dsaved" class="dsaved">Auto-saved in this browser</span></div></div>';
+ document.getElementById('page-detail').innerHTML=h;
+ bindNote(document.querySelector('#page-detail textarea.note'),'dsaved');
+}
+
+// ----- persistent notes (shared store) -----
+const NKEY='culines_fy26_variance_notes';
+let NSTORE={};try{NSTORE=JSON.parse(localStorage.getItem(NKEY))||{};}catch(e){NSTORE={};}
+function noteSave(indId){try{localStorage.setItem(NKEY,JSON.stringify(NSTORE));const i=document.getElementById(indId||'notesSaved');if(i)i.textContent='Saved '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}catch(e){const i=document.getElementById(indId||'notesSaved');if(i)i.textContent='Could not save (storage blocked)';}}
+function bindNote(ta,indId){if(!ta)return;const k=ta.dataset.k;if(NSTORE[k]!=null)ta.value=NSTORE[k];ta.addEventListener('input',()=>{if(ta.value.trim())NSTORE[k]=ta.value;else delete NSTORE[k];clearTimeout(ta._t);ta._t=setTimeout(()=>noteSave(indId),400);});}
+function exportNotes(){const out=['FY2026 Budget vs 3+9 Projection — Comments & Analysis','Exported '+new Date().toLocaleString(),''];if(NSTORE._general&&NSTORE._general.trim()){out.push('## General / cross-trade',NSTORE._general,'');}DATA.groups.forEach(g=>{if(NSTORE[g]&&NSTORE[g].trim()){out.push('## '+dispN[g]+'  ('+(DATA.tg[g].var_pl>=0?'+':'')+'$'+(DATA.tg[g].var_pl/1000).toFixed(1)+'M vs budget)',NSTORE[g],'');}});const blob=new Blob([out.join('\n')],{type:'text/markdown'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='FY2026_variance_comments.md';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+
+const nb=document.getElementById('notesBody');
+nb.innerHTML='<label class="ntlbl">General / cross-trade commentary</label><textarea class="note" data-k="_general" rows="4" placeholder="Overall narrative on the budget-to-projection variance, key assumptions, sign-off&hellip;"></textarea><div class="notes" style="margin-top:8px;font-size:12px">Per-trade-group comments live on each Trade Group page (left sidebar) and are saved together with these.</div>';
+bindNote(nb.querySelector('textarea'),'notesSaved');
+const ndet=document.getElementById('notesPanel');
+if(NSTORE._open)ndet.open=true;
+ndet.addEventListener('toggle',()=>{NSTORE._open=ndet.open;noteSave('notesSaved');});
+document.getElementById('notesClear').addEventListener('click',()=>{if(!confirm('Clear ALL comments (general + every trade group)? This cannot be undone.'))return;NSTORE={};try{localStorage.removeItem(NKEY);}catch(e){}document.querySelectorAll('textarea.note').forEach(t=>t.value='');const i=document.getElementById('notesSaved');if(i)i.textContent='Cleared';});
+document.getElementById('notesExport').addEventListener('click',exportNotes);
+if(Object.keys(NSTORE).some(k=>k!=='_open'))document.getElementById('notesSaved').textContent='Loaded saved notes';
+
+// ----- sidebar navigation -----
+(function(){let h='';DATA.groups.forEach(g=>{const v=DATA.tg[g].var_pl/1000;h+='<a class="navlink" data-pg="'+g+'">'+dispN[g]+'<span class="'+(v>=0?'sbpos':'sbneg')+'">'+(v>=0?'+':'−')+'$'+Math.abs(v).toFixed(1)+'M</span></a>';});document.getElementById('navGroups').innerHTML=h;})();
+function showPage(pg){document.querySelectorAll('.navlink').forEach(a=>a.classList.toggle('active',a.dataset.pg===pg));const dash=document.getElementById('page-dashboard'),pdet=document.getElementById('page-detail');if(pg==='dashboard'){dash.classList.add('active');pdet.classList.remove('active');}else{buildDetail(pg);dash.classList.remove('active');pdet.classList.add('active');}window.scrollTo(0,0);}
+document.getElementById('sidebar').addEventListener('click',e=>{const a=e.target.closest('.navlink');if(a){e.preventDefault();showPage(a.dataset.pg);}});
+</script>
+</body>
+</html>
