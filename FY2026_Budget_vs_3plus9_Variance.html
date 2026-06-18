@@ -592,6 +592,7 @@ function showService(svc,grp){
  if(imp){
   h+='<div class="card" style="overflow-x:auto"><table class="detail"><thead><tr><th>Item</th><th>Budget</th><th>Projection</th><th>Variance (fav.)</th><th>Volume effect</th><th>Rate effect</th></tr></thead><tbody>';
   function rr(lab,o,ci){var d=ci?-o.d:o.d,vo=ci?-o.vol:o.vol,ra=ci?-o.rate:o.rate;var cls=d>=0?'pos':'neg';h+='<tr><td>'+lab+(ci?' *':'')+'</td><td>'+mny(o.b)+'</td><td>'+mny(o.p)+'</td><td class="'+cls+'">'+mny(d)+'</td><td>'+mny(vo)+'</td><td>'+mny(ra)+'</td></tr>';}
+  h+='<tr class="plrow"><td>Volume (TEU)</td><td>'+fmt0(imp.bteu)+'</td><td>'+fmt0(imp.pteu)+'</td><td class="'+((imp.pteu-imp.bteu)>=0?'pos':'neg')+'">'+mny(imp.pteu-imp.bteu)+'</td><td>&mdash;</td><td>&mdash;</td></tr>';
   rr('Revenue',imp.rev,false);rr('Variable cost',imp.vc,true);rr('Fixed cost',imp.fc,true);
   h+='</tbody></table><div class="notes" style="margin-top:8px"><b>*</b> Variable &amp; fixed cost are shown as <b>favourable</b> variances &mdash; a cost reduction is <span class="pos">positive (better off)</span>, an increase <span class="neg">negative (worse off)</span>. Volume effect = (proj TEU &minus; budget TEU) &times; budget rate; rate effect = (proj rate &minus; budget rate) &times; proj TEU. TEU '+fmt0(imp.bteu)+' &rarr; '+fmt0(imp.pteu)+'. Fixed cost is largely capacity-driven, so its volume/rate split is indicative only.</div></div>';
  }else{h+='<div class="card notes">New service &mdash; no budget baseline, so no rate/volume variance to decompose.</div>';}
