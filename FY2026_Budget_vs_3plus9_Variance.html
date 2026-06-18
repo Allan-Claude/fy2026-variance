@@ -563,7 +563,7 @@ document.getElementById('notesExport').addEventListener('click',exportNotes);
 if(Object.keys(NSTORE).some(k=>k!=='_open'))document.getElementById('notesSaved').textContent='Loaded saved notes';
 
 // ----- sidebar navigation -----
-(function(){let h='';DATA.groups.forEach(g=>{const v=DATA.tg[g].var_pl/1000;h+='<a class="navlink" data-pg="'+g+'">'+dispN[g]+'<span class="'+(v>=0?'sbpos':'sbneg')+'">'+(v>=0?'+':'−')+'$'+Math.abs(v).toFixed(1)+'M</span></a>';});document.getElementById('navGroups').innerHTML=h;})();
+(function(){let h='';DATA.groups.forEach(g=>{const v=DATA.tg[g].rev_pl/1000;h+='<a class="navlink" data-pg="'+g+'">'+dispN[g]+'<span class="'+(v>=0?'sbpos':'sbneg')+'">'+(v>=0?'+':'−')+'$'+Math.abs(v).toFixed(1)+'M</span></a>';});document.getElementById('navGroups').innerHTML=h;})();
 function showPage(pg){document.querySelectorAll('.navlink').forEach(a=>a.classList.toggle('active',a.dataset.pg===pg));const dash=document.getElementById('page-dashboard'),pdet=document.getElementById('page-detail');if(pg==='dashboard'){dash.classList.add('active');pdet.classList.remove('active');}else{buildDetail(pg);dash.classList.remove('active');pdet.classList.add('active');}window.scrollTo(0,0);}
 document.getElementById('sidebar').addEventListener('click',e=>{const a=e.target.closest('.navlink');if(a){e.preventDefault();showPage(a.dataset.pg);}});
 </script>
