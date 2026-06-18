@@ -590,11 +590,17 @@ function showService(svc,grp){
  var imp=rvImpact(L);
  h+='<h3 class="dsub">Rate &amp; volume impact &mdash; 3+9 vs Budget (US$\'K)</h3>';
  if(imp){
-  h+='<div class="card" style="overflow-x:auto"><table class="detail"><thead><tr><th>Item</th><th>Budget</th><th>Projection</th><th>&Delta;</th><th>Volume effect</th><th>Rate effect</th></tr></thead><tbody>';
-  function rr(lab,o,ci){var cls=(ci?(o.d<=0):(o.d>=0))?'pos':'neg';h+='<tr><td>'+lab+'</td><td>'+mny(o.b)+'</td><td>'+mny(o.p)+'</td><td class="'+cls+'">'+mny(o.d)+'</td><td>'+mny(o.vol)+'</td><td>'+mny(o.rate)+'</td></tr>';}
+  h+='<div class="card" style="overflow-x:auto"><table class="detail"><thead><tr><th>Item</th><th>Budget</th><th>Projection</th><th>Variance (fav.)</th><th>Volume effect</th><th>Rate effect</th></tr></thead><tbody>';
+  function rr(lab,o,ci){var d=ci?-o.d:o.d,vo=ci?-o.vol:o.vol,ra=ci?-o.rate:o.rate;var cls=d>=0?'pos':'neg';h+='<tr><td>'+lab+(ci?' *':'')+'</td><td>'+mny(o.b)+'</td><td>'+mny(o.p)+'</td><td class="'+cls+'">'+mny(d)+'</td><td>'+mny(vo)+'</td><td>'+mny(ra)+'</td></tr>';}
   rr('Revenue',imp.rev,false);rr('Variable cost',imp.vc,true);rr('Fixed cost',imp.fc,true);
-  h+='</tbody></table><div class="notes" style="margin-top:8px">Volume effect = (proj TEU &minus; budget TEU) &times; budget rate. Rate effect = (proj rate &minus; budget rate) &times; proj TEU. TEU '+fmt0(imp.bteu)+' &rarr; '+fmt0(imp.pteu)+'. Fixed cost is largely capacity-driven, so its volume/rate split is indicative only.</div></div>';
+  h+='</tbody></table><div class="notes" style="margin-top:8px"><b>*</b> Variable &amp; fixed cost are shown as <b>favourable</b> variances &mdash; a cost reduction is <span class="pos">positive (better off)</span>, an increase <span class="neg">negative (worse off)</span>. Volume effect = (proj TEU &minus; budget TEU) &times; budget rate; rate effect = (proj rate &minus; budget rate) &times; proj TEU. TEU '+fmt0(imp.bteu)+' &rarr; '+fmt0(imp.pteu)+'. Fixed cost is largely capacity-driven, so its volume/rate split is indicative only.</div></div>';
  }else{h+='<div class="card notes">New service &mdash; no budget baseline, so no rate/volume variance to decompose.</div>';}
+ (function(){var pm=L.prem||0,tu=L.coc+L.soc;var f=function(x){return x>=1000?('$'+(x/1000).toFixed(1)+'M'):('$'+fmt0(x)+'K');};
+  h+='<div class="card notes" style="margin-top:14px"><b>Bunker price impact (this service):</b> ';
+  if(pm>0){h+='the 3+9 fuel-price assumption (HSFO $780 / VLSFO $850 / MGO $1,500 per MT, vs budget $460 / $540 / $760) adds <b class="neg">'+f(pm)+'</b> to fixed cost'+(tu?(' (&asymp;$'+fmt0(pm*1000/tu)+' / TEU)'):'')+' &mdash; i.e. fixed cost is that much <b>worse off</b> than at budget fuel rates. Re-priced to budget rates, this service\'s fixed cost would be '+f(pm)+' lower (better off).';}
+  else{h+='no direct owned-vessel bunker on this service (slot / co-load), so the fuel-price assumption has no fixed-cost impact here.';}
+  h+=' Network-wide the bunker-price effect totals <b>+$66.9M</b> (&asymp;$83 / TEU) of extra fixed cost.</div>';
+ })();
  var teu=L.coc+L.soc,bteu=(L.b_coc!=null)?(L.b_coc+L.b_soc):0;
  h+='<h3 class="dsub">Per-TEU (US$)</h3><div class="card" style="overflow-x:auto"><table class="detail"><thead><tr><th>Item</th><th>Budget</th><th>Projection</th></tr></thead><tbody>';
  function pr(lab,bv,pv){h+='<tr><td>'+lab+'</td><td>'+(bteu&&bv!=null?dol(bv*1000/bteu):'&mdash;')+'</td><td>'+(teu?dol(pv*1000/teu):'&mdash;')+'</td></tr>';}
